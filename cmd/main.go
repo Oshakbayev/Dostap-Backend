@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
 	"log"
@@ -74,18 +73,19 @@ func QueryUsers(db *sql.DB) ([]User, error) {
 }
 
 func MainPage(w http.ResponseWriter, r *http.Request) {
-	users, err := QueryUsers(db)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println("QueryUsers error:", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(users); err != nil {
-		http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
-		log.Println("JSON encoding error:", err)
-	}
+	//users, err := QueryUsers(db)
+	//if err != nil {
+	//	http.Error(w, "Internal Server Error", 500)
+	//	log.Println("QueryUsers error:", err)
+	//	return
+	//}
+	//
+	//w.Header().Set("Content-Type", "application/json")
+	//if err := json.NewEncoder(w).Encode(users); err != nil {
+	//	http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
+	//	log.Println("JSON encoding error:", err)
+	//}
+	w.Write([]byte("KEEEEEEEEEEK"))
 }
 
 //func main() {
