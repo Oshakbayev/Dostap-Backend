@@ -85,7 +85,7 @@ func MainPage(w http.ResponseWriter, r *http.Request) {
 	//	http.Error(w, "Error encoding JSON", http.StatusInternalServerError)
 	//	log.Println("JSON encoding error:", err)
 	//}
-	w.Write([]byte("KEEEEEEEEEEK"))
+	w.Write([]byte("AIDAAAAR"))
 }
 
 //func main() {
