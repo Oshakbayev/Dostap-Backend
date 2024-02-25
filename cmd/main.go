@@ -42,7 +42,7 @@ func main() {
 	router := http.NewServeMux()
 	router.HandleFunc("/", MainPage)
 	fmt.Println("kek3")
-	fmt.Println("Listening on: http://localhost:" + port + "/")
+
 	if err := http.ListenAndServe(":"+port, router); err != nil {
 
 		log.Fatal("Error starting server: ", err)
