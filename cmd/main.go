@@ -37,7 +37,7 @@ func initDB() {
 func main() {
 	initDB()
 	defer db.Close()
-	fmt.Println("Ansaer Loh and Pidaraz and Mal")
+	fmt.Println("Ansaer Loh and Pidaraz and Mal and Crenge")
 	port := "80"
 	router := http.NewServeMux()
 	router.HandleFunc("/", MainPage)
