@@ -89,3 +89,8 @@ func MainPage(w http.ResponseWriter, r *http.Request) {
     }
 }
 
+
+//func main() {
+//	server := pkg.InitServer()
+//	server.InitRouter()
+//}
