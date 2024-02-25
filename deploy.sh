@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #cd /path/to/your/go/project
+pkill main
 cd ../Dostap-Backend
 #pkill -f "go run ./cmd/main.go"
 git pull origin main --rebase
