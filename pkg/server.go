@@ -11,11 +11,11 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func InitServer(l *log.Logger) *Server {
+func InitServer() *Server {
 	route := NewRouter()
 	Routers(route)
 	return &Server{
-		log: l,
+
 		httpServer: &http.Server{
 			Addr:    ":8080",
 			Handler: HTTPHandle(route),
