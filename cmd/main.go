@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
+	"hellowWorldDeploy/pkg"
 	"log"
 	"net/http"
 )
@@ -34,19 +35,19 @@ func initDB() {
 	}
 }
 
-func main() {
-	initDB()
-	defer db.Close()
-	port := "80"
-	router := http.NewServeMux()
-	router.HandleFunc("/", MainPage)
-	fmt.Println("kek3")
-
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-
-		log.Fatal("Error starting server: ", err)
-	}
-}
+//func main() {
+//	initDB()
+//	defer db.Close()
+//	port := "80"
+//	router := http.NewServeMux()
+//	router.HandleFunc("/", MainPage)
+//	fmt.Println("kek3")
+//
+//	if err := http.ListenAndServe(":"+port, router); err != nil {
+//
+//		log.Fatal("Error starting server: ", err)
+//	}
+//}
 
 func QueryUsers(db *sql.DB) ([]User, error) {
 	var users []User
@@ -89,7 +90,12 @@ func MainPage(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte("AIDAAAAR"))
 }
 
-//func main() {
-//	server := pkg.InitServer()
-//	server.InitRouter()
-//}
+func main() {
+	server := pkg.InitServer()
+	err := server.StartServer()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+}
