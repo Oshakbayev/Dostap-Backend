@@ -1,7 +1,12 @@
 package pkg
 
 import (
-	"hellowWorldDeploy/pkg/middleware"
+	configPkg "hellowWorldDeploy/cmd/config"
+	"hellowWorldDeploy/database"
+	"hellowWorldDeploy/pkg/handlers"
+	"hellowWorldDeploy/pkg/handlers/router"
+	repository "hellowWorldDeploy/pkg/repo"
+	service2 "hellowWorldDeploy/pkg/service"
 	"log"
 	"net/http"
 )
@@ -9,31 +14,30 @@ import (
 type Server struct {
 	log        *log.Logger
 	httpServer *http.Server
+	handler    handlers.Handler
 }
 
-func InitServer() *Server {
-	route := NewRouter()
-	Routers(route)
-	return &Server{
+func InitServer(config *configPkg.Config, logger *log.Logger) *Server {
+	db := database.CreateDB(config.DBDriver)
+	repo := repository.CreateRepository(db, logger)
+	service := service2.CreateService(repo, logger)
+	route := router.NewRouter()
+	handler := handlers.CreateHandler(service, route)
 
-		httpServer: &http.Server{
-			Addr:    ":8080",
-			Handler: HTTPHandle(route),
-		},
+	server := Server{
+		log:     &log.Logger{},
+		handler: handler,
 	}
+
+	handler.Routers()
+	server.httpServer = &http.Server{
+		Addr:    config.HTTPPort,
+		Handler: handler.HTTPHandle(),
+	}
+	return &server
 }
 
 func (s *Server) StartServer() error {
 	log.Println("starting api server at http://localhost" + s.httpServer.Addr)
 	return s.httpServer.ListenAndServe()
-}
-
-func HTTPHandle(route *Router) *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Middleware(route))
-	return mux
-}
-
-func Routers(route *Router) {
-	route.Get("/", MainPage)
 }

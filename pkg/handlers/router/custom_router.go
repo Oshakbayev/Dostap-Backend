@@ -1,4 +1,4 @@
-package pkg
+package router
 
 import (
 	"errors"
@@ -30,11 +30,13 @@ func (r *Router) Post(path string, handler Handler) {
 }
 
 func (r *Router) getHandler(path, method string) (Handler, error) {
-	regex := regexp.MustCompile(path)
+
 	for _, route := range r.routes {
-		if regex.MatchString(route.Path) && route.Method == method {
+		regex := regexp.MustCompile(route.Path)
+		if regex.MatchString(path) && route.Method == method {
+			return route.Handler, nil
 		}
-		return route.Handler, nil
+
 	}
 	return nil, errors.New("Handler did not found")
 }
@@ -43,7 +45,9 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 	method := req.Method
 	handler, err := r.getHandler(path, method)
+	//	fmt.Println(path, method, r)
 	if err != nil {
+		//	fmt.Println("not found")
 		http.NotFound(w, req)
 		return
 	}

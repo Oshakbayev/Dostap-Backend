@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
+	configPkg "hellowWorldDeploy/cmd/config"
+	"hellowWorldDeploy/logs"
 	"hellowWorldDeploy/pkg"
 	"log"
 	"net/http"
+	"os"
 )
 
 var db *sql.DB
@@ -91,11 +94,22 @@ func MainPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	server := pkg.InitServer()
+	config := configPkg.CreateConfig()
+	if err := configPkg.ReadConfig("cmd/config/devConfig.json", config); err != nil {
+		log.Fatal(err)
+	}
+	logFile := logs.CreateLogFile()
+	defer func(logFile *os.File) {
+		err := logFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(logFile)
+	logger := logs.NewLogger(logFile)
+	server := pkg.InitServer(config, logger)
 	err := server.StartServer()
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 }
