@@ -1,0 +1,33 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.20' # Adjust to match your Go version
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: 92.48.58.85
+          username: root
+          password: qG5hZ7bC1j
+          script: |
+            cd /Dostap-Backend
+            git pull
+            go build -o bin
+            sudo systemctl restart bin.service
