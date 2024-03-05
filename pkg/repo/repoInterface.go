@@ -15,5 +15,5 @@ type Repository struct {
 }
 
 func CreateRepository(db *sql.DB, l *log.Logger) RepInterface {
-	return Repository{db: db, log: l}
+	return &Repository{db: db, log: l}
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// log dont work
 func CreateLogFile() *os.File {
 	logFile, err := os.Create("logs/logs.log")
 	if err != nil {

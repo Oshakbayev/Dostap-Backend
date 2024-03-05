@@ -7,7 +7,8 @@ import (
 )
 
 type SvcInterface interface {
-	SignUp(user *entity.User) error
+	SignUp(*entity.User) error
+	LogIn(string, string) error
 }
 
 type Service struct {
@@ -16,5 +17,5 @@ type Service struct {
 }
 
 func CreateService(repo repo.RepInterface, l *log.Logger) SvcInterface {
-	return Service{repo: repo, log: l}
+	return &Service{repo: repo, log: l}
 }

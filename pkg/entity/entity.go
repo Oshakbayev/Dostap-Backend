@@ -12,3 +12,5 @@ type User struct {
 	ResidenceCity string `json:"city_of_residence"`
 	Description   string `json:"description"`
 }
+
+type event struct{}
