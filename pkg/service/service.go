@@ -11,7 +11,7 @@ func (s *Service) SignUp(user *entity.User) error {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(user.EncryptedPass), bcrypt.DefaultCost)
 	if err != nil {
 		s.log.Printf("error while hashing password at the service level:user - #{user}, error - #{err}")
-		return fmt.Errorf("error while hashing password : user - #{user}, error - #{err}")
+		return fmt.Errorf("error while hashing password: %v, error: %s", user, err)
 	}
 	user.EncryptedPass = string(hashedPass)
 	err = s.repo.CreateUser(user)
@@ -25,13 +25,11 @@ func (s *Service) SignUp(user *entity.User) error {
 func (s *Service) LogIn(phoneNum, pass string) error {
 	user, err := s.repo.GetUserByPhoneNum(phoneNum)
 	if err != nil {
-		fmt.Println("KEEEK:", err)
-		return fmt.Errorf("There is no user with this number: #{user.PhoneNum}")
+		return fmt.Errorf("there is no user with this number %s", phoneNum)
 	}
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(user.EncryptedPass), bcrypt.DefaultCost)
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(user.EncryptedPass)); err != nil {
-		fmt.Println("loginPass", pass, "------dbPASS", user.EncryptedPass)
-		return fmt.Errorf("given pasword is incorrect: #{phoneNum}, {pass}")
+		return fmt.Errorf("given pasword of %s is incorrect: %s", phoneNum, pass)
 	}
 	return nil
 }

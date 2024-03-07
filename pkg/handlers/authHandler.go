@@ -45,7 +45,7 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	pass := credentials.Password
 	if err := h.svc.LogIn(phoneNum, pass); err != nil {
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		fmt.Println("HERE?")
 		return
