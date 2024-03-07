@@ -8,7 +8,7 @@ import (
 
 type SvcInterface interface {
 	SignUp(*entity.User) error
-	LogIn(string, string) error
+	LogIn(string, string) (string, error)
 }
 
 type Service struct {

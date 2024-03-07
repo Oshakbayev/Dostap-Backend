@@ -2,7 +2,10 @@ package entity
 
 import "github.com/golang-jwt/jwt"
 
-var JWTKey = []byte("sercet_key")
+var (
+	JWTKey      = []byte("sercet_key")
+	EmtpyString = ""
+)
 
 type User struct {
 	ID            int64

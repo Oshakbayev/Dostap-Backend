@@ -25,6 +25,7 @@ func (h *Handler) HTTPHandle() *http.ServeMux {
 func (h *Handler) Routers() {
 	h.route.Post("/signup", h.SignUp)
 	h.route.Post("/login", h.LogIn)
+	h.route.Get("/", h.TempHome)
 	//h.route.Post("/login", h.LogIn)
 
 }

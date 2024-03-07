@@ -2,8 +2,10 @@ package service
 
 import (
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"hellowWorldDeploy/pkg/entity"
+	"time"
 )
 
 func (s *Service) SignUp(user *entity.User) error {
@@ -16,20 +18,35 @@ func (s *Service) SignUp(user *entity.User) error {
 	user.EncryptedPass = string(hashedPass)
 	err = s.repo.CreateUser(user)
 	if err != nil {
-		s.log.Printf("Error while Inserting user into the table at the service level")
+		//s.log.Printf("Error while Inserting user into the table at the service level")
 		return fmt.Errorf("error while insert new user: %v, error: %s", user, err)
 	}
 	return nil
 }
 
-func (s *Service) LogIn(phoneNum, pass string) error {
+func (s *Service) LogIn(phoneNum, pass string) (string, error) {
 	user, err := s.repo.GetUserByPhoneNum(phoneNum)
 	if err != nil {
-		return fmt.Errorf("there is no user with this number %s", phoneNum)
+		return entity.EmtpyString, fmt.Errorf("there is no user with this number %s", phoneNum)
 	}
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-	if err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(user.EncryptedPass)); err != nil {
-		return fmt.Errorf("given pasword of %s is incorrect: %s", phoneNum, pass)
+	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(pass)); err != nil {
+		fmt.Println(hashedPass, "----", user.EncryptedPass)
+		s.log.Printf("given password of %s is incorrect: %s", phoneNum, pass)
+		return entity.EmtpyString, fmt.Errorf("given password of %s is incorrect: %s", phoneNum, pass)
 	}
-	return nil
+	expTime := time.Now().Add(time.Minute * 100)
+	claims := &entity.Claims{
+		PhoneNum: phoneNum,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expTime.Unix(),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString(entity.JWTKey)
+	if err != nil {
+		s.log.Printf("Error while signing jwt token")
+		return entity.EmtpyString, fmt.Errorf("error while signing jwt token")
+	}
+	return signedToken, nil
 }
