@@ -25,9 +25,12 @@ func (s *Service) SignUp(user *entity.User) error {
 func (s *Service) LogIn(phoneNum, pass string) error {
 	user, err := s.repo.GetUserByPhoneNum(phoneNum)
 	if err != nil {
+		fmt.Println("KEEEK:", err)
 		return fmt.Errorf("There is no user with this number: #{user.PhoneNum}")
 	}
-	if err = bcrypt.CompareHashAndPassword([]byte(pass), []byte(user.EncryptedPass)); err != nil {
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(user.EncryptedPass), bcrypt.DefaultCost)
+	if err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(user.EncryptedPass)); err != nil {
+		fmt.Println("loginPass", pass, "------dbPASS", user.EncryptedPass)
 		return fmt.Errorf("given pasword is incorrect: #{phoneNum}, {pass}")
 	}
 	return nil
