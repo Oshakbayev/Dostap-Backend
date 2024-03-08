@@ -22,7 +22,7 @@ func InitServer(config *configPkg.Config, logger *log.Logger) *Server {
 	repo := repository.CreateRepository(db, logger)
 	service := service2.CreateService(repo, logger)
 	route := router.NewRouter()
-	handler := handlers.CreateHandler(service, route)
+	handler := handlers.CreateHandler(service, route, logger)
 
 	server := Server{
 		log:     &log.Logger{},

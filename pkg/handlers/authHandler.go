@@ -40,15 +40,21 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	phoneNum := credentials.PhoneNum
+	email := credentials.Email
 	pass := credentials.Password
-	signedToken, err := h.svc.LogIn(phoneNum, pass)
+	err := h.svc.LogIn(email, pass)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		fmt.Println("HERE?")
+		return
+	}
+	signedToken, err := h.svc.TokenGenerator(email)
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Creation of jwt token failed"))
-		fmt.Println("HERE?")
-		return
+		w.Write([]byte(err.Error()))
 	}
 
 	w.Header().Add("Content-Type", "application/json")
@@ -89,10 +95,26 @@ func (h *Handler) TempHome(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("invalid token")))
 		return
 	}
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Hello %s", claims.PhoneNum)))
+	w.Write([]byte(fmt.Sprintf("Hello %s", claims.Email)))
 }
 
 func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (h *Handler) ConfirmAccount(w http.ResponseWriter, r *http.Request) {
+	secretCode := r.FormValue("link")
+	fmt.Println(secretCode)
+	err := h.svc.VerifyAccount(secretCode)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Your email is confirmed and you are registered!"))
 }

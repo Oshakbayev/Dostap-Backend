@@ -29,6 +29,10 @@ func (r *Router) Post(path string, handler Handler) {
 	r.AddRoute(path, http.MethodPost, handler)
 }
 
+func (r *Router) Put(path string, handler Handler) {
+	r.AddRoute(path, http.MethodPut, handler)
+}
+
 func (r *Router) getHandler(path, method string) (Handler, error) {
 
 	for _, route := range r.routes {

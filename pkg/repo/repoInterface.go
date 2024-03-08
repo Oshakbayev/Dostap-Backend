@@ -7,6 +7,7 @@ import (
 
 type RepInterface interface {
 	UserInterface
+	EmailInterface
 }
 
 type Repository struct {
