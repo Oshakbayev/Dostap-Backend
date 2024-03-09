@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang-jwt/jwt"
 	"hellowWorldDeploy/pkg/entity"
 	"net/http"
 )
@@ -71,35 +70,38 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) TempHome(w http.ResponseWriter, r *http.Request) {
-	var token map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-	tokenStr := token["Token"].(string)
-	claims := &entity.Claims{}
-	tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-		return entity.JWTKey, nil
-	})
-	if err != nil {
-		fmt.Println("{", err, "}", "{", jwt.ErrSignatureInvalid, "}")
-		if err.Error() == jwt.ErrSignatureInvalid.Error() {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(fmt.Sprintf("bad signature")))
-			return
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("bad request")))
-		return
-	}
-	if !tkn.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(fmt.Sprintf("invalid token")))
-		return
-	}
+	//var token map[string]interface{}
+	//if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
+	//	w.WriteHeader(http.StatusUnauthorized)
+	//	return
+	//}
+	//tokenStr := token["Token"].(string)
+	//claims := &entity.Claims{}
+	//tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+	//	return entity.JWTKey, nil
+	//})
+	//if err != nil {
+	//	fmt.Println("{", err, "}", "{", jwt.ErrSignatureInvalid, "}")
+	//	if err.Error() == jwt.ErrSignatureInvalid.Error() {
+	//		w.WriteHeader(http.StatusUnauthorized)
+	//		w.Write([]byte(fmt.Sprintf("bad signature")))
+	//		return
+	//	}
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	w.Write([]byte(fmt.Sprintf("bad request")))
+	//	return
+	//}
+	//if !tkn.Valid {
+	//	w.WriteHeader(http.StatusUnauthorized)
+	//	w.Write([]byte(fmt.Sprintf("invalid token")))
+	//	return
+	//}
+	//w.Header().Add("Content-Type", "application/json")
+	//w.WriteHeader(http.StatusOK)
+	//w.Write([]byte(fmt.Sprintf("Hello %s", claims.Email)))
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Hello %s", claims.Email)))
+	w.Write([]byte("Hello,World Yerka"))
 }
 
 func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
