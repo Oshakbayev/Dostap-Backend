@@ -31,6 +31,6 @@ jobs:
             git pull origin main
             go build -o dostapp ./cmd/main.go
             ./dostapp&!
-            lsof -i :80
+            lsof -i :3001
             echo "Hello"
             
