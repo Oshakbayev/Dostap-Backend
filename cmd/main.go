@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("TEST of deploy.sh")
+	fmt.Println("Tpotentially final test of ci/cd ")
 	config := configPkg.CreateConfig()
 	if err := configPkg.ReadConfig("cmd/config/devConfig.json", config); err != nil {
 		log.Fatal(err)
