@@ -5,5 +5,5 @@ cd ../Dostap-Backend
 pkill bin
 git pull origin main --rebase
 go build -o bin ./cmd/main.go
-./bin &
+./bin&
 disown
