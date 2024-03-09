@@ -29,7 +29,9 @@ jobs:
           script: |
             cd Dostap-Backend
             git pull origin main
+            lsof -i :80
             pkill dostapp
+            lsof -i :80
             go build -o dostapp ./cmd/main.go
             nohup ./dostapp >dostapp.out 2>&1 & 
             echo "Hello"
