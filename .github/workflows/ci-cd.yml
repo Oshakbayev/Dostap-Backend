@@ -27,7 +27,7 @@ jobs:
           username: root
           password: qG5hZ7bC1j
           script: |
-            cd ../Dostap-Backend
+            cd /Dostap-Backend
             git pull origin main --rebase
             go build -o bin ./cmd/main.go
             ./bin&
