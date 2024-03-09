@@ -29,6 +29,7 @@ jobs:
           script: |
             cd Dostap-Backend
             git pull origin main
+            pkill dostapp
             go build -o dostapp ./cmd/main.go
             ./dostapp & disown 
             lsof -i :3001
