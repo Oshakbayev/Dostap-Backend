@@ -23,8 +23,12 @@ jobs:
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
-          host: 92.48.58.85
+          host: 92.38.48.85
           username: root
           password: qG5hZ7bC1j
           script: |
-            ./Dostap-backend/deploy.sh
+            cd Dostap-Backend
+            git pull origin main
+            go build -o dostapp ./cmd/main.go
+            ./dostapp&
+            disown
