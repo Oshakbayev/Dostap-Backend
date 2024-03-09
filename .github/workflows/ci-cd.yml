@@ -31,6 +31,6 @@ jobs:
             git pull origin main
             pkill dostapp
             go build -o dostapp ./cmd/main.go
-            ./dostapp & disown 
+            nohup ./dostapp >dostapp.out 2>&1 & 
             echo "Hello"
             exit
