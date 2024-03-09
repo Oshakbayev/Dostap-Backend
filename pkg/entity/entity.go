@@ -41,6 +41,7 @@ type Credentials struct {
 
 type Claims struct {
 	Email string `json:"email"`
+	Level string `json:"level"`
 	jwt.StandardClaims
 }
 

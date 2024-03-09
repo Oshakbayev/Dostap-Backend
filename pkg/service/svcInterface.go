@@ -1,16 +1,13 @@
 package service
 
 import (
-	"hellowWorldDeploy/pkg/entity"
 	"hellowWorldDeploy/pkg/repo"
 	"log"
 )
 
 type SvcInterface interface {
-	SignUp(*entity.User) (int, error)
-	LogIn(string, string) (int, error)
-	TokenGenerator(string) (string, error)
-	VerifyAccount(string) (int, error)
+	UserServiceInterface
+	ProfileServiceInterface
 }
 
 type Service struct {

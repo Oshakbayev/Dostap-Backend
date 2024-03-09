@@ -13,6 +13,13 @@ import (
 	"time"
 )
 
+type UserServiceInterface interface {
+	SignUp(*entity.User) (int, error)
+	LogIn(string, string) (int, error)
+	TokenGenerator(string) (string, error)
+	VerifyAccount(string) (int, error)
+}
+
 func (s *Service) SignUp(user *entity.User) (int, error) {
 	//Encrypting passsword
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(user.EncryptedPass), bcrypt.DefaultCost)
@@ -66,12 +73,12 @@ func (s *Service) LogIn(email, pass string) (int, error) {
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return http.StatusBadRequest, errors.New("user does not exist")
+			return http.StatusBadRequest, fmt.Errorf("given email %s is incorrect", email)
 		}
 		return http.StatusInternalServerError, err
 	}
 	if !user.IsEmailVerified {
-		return http.StatusBadRequest, errors.New("email did not verified")
+		return http.StatusBadRequest, fmt.Errorf("email %s did not verified", email)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(pass)); err != nil {
 		s.log.Printf("given password of %s is incorrect: %s", email, pass)
@@ -84,6 +91,7 @@ func (s *Service) TokenGenerator(email string) (string, error) {
 	expTime := time.Now().Add(time.Minute * 100)
 	claims := &entity.Claims{
 		Email: email,
+		Level: "user",
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expTime.Unix(),
 		},

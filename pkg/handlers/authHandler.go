@@ -27,7 +27,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("user uspeshno zaregan"))
+	w.Write([]byte("verification email has sended"))
 	return
 
 }
@@ -61,8 +61,10 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(struct {
 		Token string
+		Msg   string
 	}{
 		Token: signedToken,
+		Msg:   "Your jwt token",
 	}); err != nil {
 		fmt.Println("TOKEEEEEN DID NOT SENT", err)
 	}
