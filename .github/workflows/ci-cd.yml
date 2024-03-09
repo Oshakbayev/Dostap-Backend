@@ -27,7 +27,4 @@ jobs:
           username: root
           password: qG5hZ7bC1j
           script: |
-            cd /root/Dostap-Backend
-            git pull
-            go build -o dostapp
-            ./dostapp
+            ./Dostap-backend/deploy.sh
