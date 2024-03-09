@@ -30,4 +30,4 @@ jobs:
             cd /root/Dostap-Backend
             git pull
             go build -o dostapp
-            sudo systemctl restart dostapp.service
+            ./dostapp
