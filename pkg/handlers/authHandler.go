@@ -19,9 +19,9 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println(user)
-	if err := h.svc.SignUp(&user); err != nil {
+	if status, err := h.svc.SignUp(&user); err != nil {
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -42,10 +42,10 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	}
 	email := credentials.Email
 	pass := credentials.Password
-	err := h.svc.LogIn(email, pass)
+	status, err := h.svc.LogIn(email, pass)
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(status)
 		w.Write([]byte(err.Error()))
 		fmt.Println("HERE?")
 		return
@@ -107,10 +107,10 @@ func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) ConfirmAccount(w http.ResponseWriter, r *http.Request) {
 	secretCode := r.FormValue("link")
 	fmt.Println(secretCode)
-	err := h.svc.VerifyAccount(secretCode)
+	status, err := h.svc.VerifyAccount(secretCode)
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(status)
 		w.Write([]byte(err.Error()))
 		return
 	}

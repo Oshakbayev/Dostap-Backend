@@ -7,10 +7,10 @@ import (
 )
 
 type SvcInterface interface {
-	SignUp(*entity.User) error
-	LogIn(string, string) error
+	SignUp(*entity.User) (int, error)
+	LogIn(string, string) (int, error)
 	TokenGenerator(string) (string, error)
-	VerifyAccount(string) error
+	VerifyAccount(string) (int, error)
 }
 
 type Service struct {
