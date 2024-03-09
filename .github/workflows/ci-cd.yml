@@ -30,7 +30,7 @@ jobs:
             cd Dostap-Backend
             git pull origin main
             go build -o dostapp ./cmd/main.go
-            ./dostapp&
-            disown
+            ./dostapp&!
+            lsof -i :80
             echo "Hello"
             
