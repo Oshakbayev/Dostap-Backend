@@ -31,4 +31,5 @@ jobs:
             git pull origin main
             go build -o dostapp ./cmd/main.go
             ./dostapp&
-            disown
+            echo "Hello"
+            
