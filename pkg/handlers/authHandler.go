@@ -101,7 +101,7 @@ func (h *Handler) TempHome(w http.ResponseWriter, r *http.Request) {
 	//w.Write([]byte(fmt.Sprintf("Hello %s", claims.Email)))
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello,World Yerka"))
+	w.Write([]byte("Hello,World Yerka and Meir are mambets"))
 }
 
 func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
