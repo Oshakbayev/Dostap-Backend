@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Tpotentially final test of ci/cd ")
+	fmt.Println("Tpotentially final test of ci/cd 3.0 ")
 	config := configPkg.CreateConfig()
 	if err := configPkg.ReadConfig("cmd/config/devConfig.json", config); err != nil {
 		log.Fatal(err)
