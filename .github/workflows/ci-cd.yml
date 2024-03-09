@@ -33,4 +33,4 @@ jobs:
             ./dostapp & disown 
             lsof -i :3001
             echo "Hello"
-            
+            exit
