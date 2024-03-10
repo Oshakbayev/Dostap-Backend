@@ -45,4 +45,13 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+type UpdateJson struct {
+	Token    TokenData `json:"jwtToken"`
+	UserInfo User      `json:"userInfo"`
+}
+
+type TokenData struct {
+	Token string
+}
+
 type event struct{}

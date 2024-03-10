@@ -9,12 +9,12 @@ import (
 )
 
 func (h *Handler) ProfileEdit(w http.ResponseWriter, r *http.Request) {
-	var token map[string]interface{}
-	if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
+	var updateJson entity.UpdateJson
+	if err := json.NewDecoder(r.Body).Decode(&updateJson); err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	tokenStr := token["Token"].(string)
+	tokenStr := updateJson.Token.Token
 	claims := &entity.Claims{}
 	tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return entity.JWTKey, nil
@@ -35,14 +35,17 @@ func (h *Handler) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("invalid token")))
 		return
 	}
-	user := entity.User{}
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		//fmt.Println("bad request is correct")
-		return
-	}
+	decodedClaims := tkn.Claims.(*entity.Claims)
+	user := updateJson.UserInfo
+	//if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	//	w.Header().Add("Content-Type", "application/json")
+	//	w.WriteHeader(http.StatusBadRequest)
+	//	w.Write([]byte(err.Error()))
+	//	fmt.Println("bad request during decode user")
+	//	return
+	//}
+	fmt.Println("this is user for update:", user)
+	user.Email = decodedClaims.Email
 	status, err := h.svc.UpdateUserProfileInfo(&user)
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
