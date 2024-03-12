@@ -8,25 +8,17 @@ import (
 )
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-
 	user := entity.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
-		//fmt.Println("bad request is correct")
+		h.WriteHTTPResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	fmt.Println(user)
 	if status, err := h.svc.SignUp(&user); err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(status)
-		w.Write([]byte(err.Error()))
+		h.WriteHTTPResponse(w, status, err.Error())
 		return
 	}
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("verification email has sended"))
+	h.WriteHTTPResponse(w, http.StatusOK, "verification email has sended")
 	return
 
 }
@@ -34,26 +26,19 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	var credentials entity.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		h.WriteHTTPResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	email := credentials.Email
 	pass := credentials.Password
-	status, err := h.svc.LogIn(email, pass)
+	status, userID, err := h.svc.LogIn(email, pass)
 	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(status)
-		w.Write([]byte(err.Error()))
-		fmt.Println("HERE?")
+		h.WriteHTTPResponse(w, status, err.Error())
 		return
 	}
-	signedToken, err := h.svc.TokenGenerator(email)
+	signedToken, err := h.svc.TokenGenerator(userID, email)
 	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 	}
 
 	w.Header().Add("Content-Type", "application/json")
@@ -70,38 +55,7 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) TempHome(w http.ResponseWriter, r *http.Request) {
-	//var token map[string]interface{}
-	//if err := json.NewDecoder(r.Body).Decode(&token); err != nil {
-	//	w.WriteHeader(http.StatusUnauthorized)
-	//	return
-	//}
-	//tokenStr := token["Token"].(string)
-	//claims := &entity.Claims{}
-	//tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
-	//	return entity.JWTKey, nil
-	//})
-	//if err != nil {
-	//	fmt.Println("{", err, "}", "{", jwt.ErrSignatureInvalid, "}")
-	//	if err.Error() == jwt.ErrSignatureInvalid.Error() {
-	//		w.WriteHeader(http.StatusUnauthorized)
-	//		w.Write([]byte(fmt.Sprintf("bad signature")))
-	//		return
-	//	}
-	//	w.WriteHeader(http.StatusBadRequest)
-	//	w.Write([]byte(fmt.Sprintf("bad request")))
-	//	return
-	//}
-	//if !tkn.Valid {
-	//	w.WriteHeader(http.StatusUnauthorized)
-	//	w.Write([]byte(fmt.Sprintf("invalid token")))
-	//	return
-	//}
-	//w.Header().Add("Content-Type", "application/json")
-	//w.WriteHeader(http.StatusOK)
-	//w.Write([]byte(fmt.Sprintf("Hello %s", claims.Email)))
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello,World Yerka and Meir are mambets"))
+	h.WriteHTTPResponse(w, http.StatusOK, "YERKA pidr ne razreshil mainPage sdelat zashishennim((((")
 }
 
 func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -113,12 +67,8 @@ func (h *Handler) ConfirmAccount(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(secretCode)
 	status, err := h.svc.VerifyAccount(secretCode)
 	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(status)
-		w.Write([]byte(err.Error()))
+		h.WriteHTTPResponse(w, status, err.Error())
 		return
 	}
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Your email is confirmed and you are registered!"))
+	h.WriteHTTPResponse(w, http.StatusOK, "Your email is confirmed and you are registered!")
 }

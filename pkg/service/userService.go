@@ -7,17 +7,16 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"hellowWorldDeploy/pkg/entity"
-	"math/rand"
 	"net/http"
-	"net/smtp"
 	"time"
 )
 
 type UserServiceInterface interface {
 	SignUp(*entity.User) (int, error)
-	LogIn(string, string) (int, error)
-	TokenGenerator(string) (string, error)
+	LogIn(string, string) (int, int64, error)
+	TokenGenerator(int64, string) (string, error)
 	VerifyAccount(string) (int, error)
+	TokenChecker(string) (*entity.Claims, int, error)
 }
 
 func (s *Service) SignUp(user *entity.User) (int, error) {
@@ -28,6 +27,7 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 		return http.StatusInternalServerError, fmt.Errorf("error while hashing password: %v, error: %s", user, err)
 	}
 	user.EncryptedPass = string(hashedPass)
+	//if user has already registered but not verified
 	isExist, err, userInDB := s.CheckUserExistence(user)
 	if err != nil {
 		return http.StatusInternalServerError, err
@@ -36,24 +36,15 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 		if err = s.repo.UpdateUser(user); err != nil {
 			return http.StatusInternalServerError, err
 		}
-		emailContent, verificationLink, err := s.VerificationEmailGenerator(user.Email)
-		if err != nil {
-			return http.StatusInternalServerError, err
-		}
-		err = s.SendVerificationEmail(user.Email, emailContent)
-		if err != nil {
-			return http.StatusInternalServerError, err
-		}
-		if err = s.InsertVerificationEmail(user.ID, emailContent, verificationLink); err != nil {
-			return http.StatusInternalServerError, err
-		}
 	} else if isExist && userInDB.IsEmailVerified {
 		return http.StatusBadRequest, errors.New("user with this email already exists")
-	}
-	err = s.repo.CreateUser(user)
-	if err != nil {
-		//s.log.Printf("Error while Inserting user into the table at the service level")
-		return http.StatusInternalServerError, fmt.Errorf("error while insert new user: %v, error: %s", user, err)
+	} else if !isExist {
+		//user registration
+		err = s.repo.CreateUser(user)
+		if err != nil {
+			//s.log.Printf("Error while Inserting user into the table at the service level")
+			return http.StatusInternalServerError, fmt.Errorf("error while insert new user: %v, error: %s", user, err)
+		}
 	}
 	emailContent, verificationLink, err := s.VerificationEmailGenerator(user.Email)
 	if err != nil {
@@ -63,35 +54,36 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	if err = s.InsertVerificationEmail(user.ID, emailContent, verificationLink); err != nil {
+	if err = s.CreateVerifyEmail(userInDB.ID, user.Email, verificationLink); err != nil {
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
 }
 
-func (s *Service) LogIn(email, pass string) (int, error) {
+func (s *Service) LogIn(email, pass string) (int, int64, error) {
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return http.StatusBadRequest, fmt.Errorf("given email %s is incorrect", email)
+			return http.StatusBadRequest, entity.NilID, fmt.Errorf("no user exist with given email %s", email)
 		}
-		return http.StatusInternalServerError, err
+		return http.StatusInternalServerError, entity.NilID, err
 	}
 	if !user.IsEmailVerified {
-		return http.StatusBadRequest, fmt.Errorf("email %s did not verified", email)
+		return http.StatusBadRequest, -entity.NilID, fmt.Errorf("email %s did not verified", email)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(pass)); err != nil {
 		s.log.Printf("given password of %s is incorrect: %s", email, pass)
-		return http.StatusBadRequest, fmt.Errorf("given password of %s is incorrect: %s", email, pass)
+		return http.StatusBadRequest, entity.NilID, fmt.Errorf("given password of %s is incorrect: %s", email, pass)
 	}
-	return http.StatusOK, nil
+	return http.StatusOK, user.ID, nil
 }
 
-func (s *Service) TokenGenerator(email string) (string, error) {
+func (s *Service) TokenGenerator(userID int64, email string) (string, error) {
 	expTime := time.Now().Add(time.Minute * 100)
 	claims := &entity.Claims{
 		Email: email,
 		Level: "user",
+		Sub:   userID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expTime.Unix(),
 		},
@@ -105,62 +97,48 @@ func (s *Service) TokenGenerator(email string) (string, error) {
 	return signedToken, nil
 }
 
-func (s *Service) VerificationEmailGenerator(email string) (string, string, error) {
-	rand.New(rand.NewSource(time.Now().UnixNano()))
-	allowedChars := "0123456789"
-	var result string
-	for i := 0; i < 10; i++ {
-		randomIndex := rand.Intn(len(allowedChars))
-		result += string(allowedChars[randomIndex])
-	}
-	secretCode, err := bcrypt.GenerateFromPassword([]byte(result+email), bcrypt.DefaultCost)
-	if err != nil {
-		s.log.Printf("error while hashing secretCode for email verification: error error - #{err}")
-		return entity.EmtpyString, entity.EmtpyString, fmt.Errorf("error while hashing secretCode for email verification: error: %s", err)
-	}
-	emailContent := "Hello, thanks for registration on our app! Please follow the link attached below to complete your registration " + "http://localhost:80/auth/confirmUserAccount?link=" + string(secretCode) + " Reminder: the link is valid for 2 days"
-	return emailContent, string(secretCode), nil
-}
+func (s *Service) TokenChecker(tokenStr string) (*entity.Claims, int, error) {
+	claims := &entity.Claims{}
+	tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 
-func (s *Service) SendVerificationEmail(emailAddress, emailContent string) error {
-	to := []string{emailAddress}
-	subject := "Subject: DostApp registration link\r\n"
-	auth := smtp.PlainAuth("", "rakatan228322@gmail.com", "zgjw nlyp zyhk bczp", "smtp.gmail.com")
-	msg := []byte(subject + "\r\n" + emailContent)
-	err := smtp.SendMail("smtp.gmail.com:587", auth, "rakatan228322@gmail.com", to, msg)
+		return entity.JWTKey, nil
+	})
 	if err != nil {
-		s.log.Printf("error while sending verification email: error: #{err}")
-		return fmt.Errorf("error while sending verification email: error: %s", err)
+		if err.Error() == jwt.ErrSignatureInvalid.Error() {
+			s.log.Printf("Error in TokenChecker(Service): %v", err)
+			return claims, http.StatusUnauthorized, err
+		}
+		s.log.Printf("Error in TokenChecker(Service): %v", err)
+		return claims, http.StatusBadRequest, err
 	}
-	return nil
+	if !tkn.Valid {
+		s.log.Printf("Error in TokenChecker(Service): %v", err)
+		return claims, http.StatusBadRequest, err
+	}
+	decodedClaims := tkn.Claims.(*entity.Claims)
+	return decodedClaims, http.StatusOK, nil
 }
 
 func (s *Service) VerifyAccount(secretCode string) (int, error) {
-	userId, expTime, err := s.repo.GetVerifyEmailBySecretCode(secretCode)
+	verifyEmail, err := s.repo.GetVerifyEmailBySecretCode(secretCode)
 	if err != nil {
-		fmt.Println(err, "HERERERERERERE")
 		if errors.Is(err, sql.ErrNoRows) {
 			return http.StatusBadRequest, errors.New("emergency: secretCode does not exist")
 		}
 		return http.StatusInternalServerError, err
 	}
-	fmt.Println(userId, "----------")
 	//link expired
-	if expTime.Before(time.Now()) {
-		fmt.Println(err, "HERERERERERERE2")
+	if verifyEmail.ExpTime.Before(time.Now()) {
 		return http.StatusBadRequest, errors.New("link expired")
 	}
 
-	user, err := s.repo.GetUserByID(userId)
+	user, err := s.repo.GetUserByID(verifyEmail.UserID)
 	if err != nil {
-		fmt.Println(err, "HERERERERERERE3")
 		if errors.Is(err, sql.ErrNoRows) {
 			return http.StatusBadRequest, errors.New("user does not exist")
 		}
 		return http.StatusInternalServerError, err
 	}
-	fmt.Println(user, "++++++")
-	fmt.Println(user.Email, "------++++++")
 	user.IsEmailVerified = true
 	err = s.repo.UpdateUser(user)
 	if err != nil {
@@ -188,19 +166,4 @@ func (s *Service) CheckUserExistence(user *entity.User) (bool, error, *entity.Us
 		return false, nil, nil
 	}
 	return true, nil, sameUser
-}
-
-func (s *Service) InsertVerificationEmail(userID int64, emailContent, verificationLink string) error {
-	expTime := time.Now().Add(time.Hour * 48)
-	email := entity.Email{
-		UserID:     userID,
-		Email:      emailContent,
-		SecretCode: verificationLink,
-		ExpTime:    expTime,
-	}
-	err := s.repo.CreateEmail(&email)
-	if err != nil {
-		return err
-	}
-	return nil
 }

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"hellowWorldDeploy/pkg/entity"
 	"hellowWorldDeploy/pkg/handlers/router"
 	"hellowWorldDeploy/pkg/middleware"
 	service "hellowWorldDeploy/pkg/service"
@@ -29,26 +31,16 @@ func (h *Handler) Routers() {
 	h.route.Post("/login", h.LogIn)
 	h.route.Get("/auth/confirmUserAccount", h.ConfirmAccount)
 	h.route.Post("/updateProfile", h.ProfileEdit)
+	h.route.Get("/createEvent", h.CreateEvent)
 	h.route.Get("/", h.TempHome)
 	//h.route.Post("/login", h.LogIn)
 
 }
 
-func (h *Handler) WriteHTTPStatusBadRequest(w http.ResponseWriter, err error) {
+func (h *Handler) WriteHTTPResponse(w http.ResponseWriter, status int, msg string) {
 	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte(err.Error()))
-}
-
-func (h *Handler) WriteHTTPStatusUnauthorized(w http.ResponseWriter, err error) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusUnauthorized)
-	w.Write([]byte(err.Error()))
-
-}
-
-func (h *Handler) WriteHTTPStatusInternalServerError(w http.ResponseWriter, err error) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte(err.Error()))
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(entity.ResponseJSON{Message: msg}); err != nil {
+		h.l.Printf("Error during sending response with %d: %v", status, err)
+	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	_ "github.com/lib/pq"
 	configPkg "hellowWorldDeploy/cmd/config"
 	"hellowWorldDeploy/logs"
@@ -11,7 +10,6 @@ import (
 )
 
 func main() {
-	fmt.Println("Tpotentially final test of ci/cd 3.0 ")
 	config := configPkg.CreateConfig()
 	if err := configPkg.ReadConfig("cmd/config/devConfig.json", config); err != nil {
 		log.Fatal(err)

@@ -12,16 +12,7 @@ type ProfileServiceInterface interface {
 }
 
 func (s *Service) UpdateUserProfileInfo(updatedUser *entity.User) (int, error) {
-	oldUser, err := s.repo.GetUserByEmail(updatedUser.Email)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return http.StatusBadRequest, errors.New("user does not exist")
-		}
-		return http.StatusInternalServerError, err
-	}
-	updatedUser.IsEmailVerified = oldUser.IsEmailVerified
-	updatedUser.ID = oldUser.ID
-	err = s.repo.UpdateUser(updatedUser)
+	err := s.repo.UpdateUser(updatedUser)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return http.StatusBadRequest, errors.New("user does not exist")

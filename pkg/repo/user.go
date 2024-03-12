@@ -80,16 +80,13 @@ func (r *Repository) UpdateUser(user *entity.User) error {
     SET 
         first_name = $1,
         last_name = $2,
-        password = $3,
-        avatar_link = $4,
-        gender = $5,
-        age = $6,
-        phone_number = $7,
-        city_of_residence = $8,
-        description = $9,
-        email = $10,
-        is_email_verified = $11
-    WHERE id = $12
+        avatar_link = $3,
+        gender = $4,
+        age = $5,
+        phone_number = $6,
+        city_of_residence = $7,
+        description = $8
+    WHERE id = $9
 `)
 	if err != nil {
 		r.log.Printf("Error while preparing data to UpdateUser(repo) by id: %s\n", err.Error())
@@ -105,15 +102,12 @@ func (r *Repository) UpdateUser(user *entity.User) error {
 	_, err = stmt.Exec(
 		user.FirstName,
 		user.LastName,
-		user.EncryptedPass,
 		user.AvatarLink,
 		user.Gender,
 		user.Age,
 		user.PhoneNum,
 		user.ResidenceCity,
 		user.Description,
-		user.Email,
-		user.IsEmailVerified,
 		user.ID, // Assuming ID is the 12th parameter in your query
 	)
 	if err != nil {

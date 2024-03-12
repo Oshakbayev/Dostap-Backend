@@ -3,11 +3,10 @@ package repo
 import (
 	"database/sql"
 	"hellowWorldDeploy/pkg/entity"
-	"time"
 )
 
 type EmailInterface interface {
-	GetVerifyEmailBySecretCode(string) (int64, time.Time, error)
+	GetVerifyEmailBySecretCode(string) (*entity.Email, error)
 	CreateEmail(*entity.Email) error
 	UpdateVerifyEmail(string) error
 }
@@ -31,20 +30,19 @@ func (r *Repository) CreateEmail(email *entity.Email) error {
 	return nil
 }
 
-func (r *Repository) GetVerifyEmailBySecretCode(secretCode string) (int64, time.Time, error) {
-	var userID int64
-	var expTime time.Time
-	stmt, err := r.db.Prepare("SELECT user_id,expired_at FROM verify_emails WHERE secret_code = $1 ")
+func (r *Repository) GetVerifyEmailBySecretCode(secretCode string) (*entity.Email, error) {
+	verifyEmail := entity.Email{}
+	stmt, err := r.db.Prepare("SELECT * FROM verify_emails WHERE secret_code = $1 ")
 	if err != nil {
 		r.log.Printf("Error while to prepare data to select verify_email by secretCode GetVerifyEmail(repo): %s\n", err.Error())
-		return -1, expTime, err
+		return &verifyEmail, err
 	}
-	err = stmt.QueryRow(secretCode).Scan(&userID, &expTime)
+	err = stmt.QueryRow(secretCode).Scan(&verifyEmail.ID, &verifyEmail.UserID, &verifyEmail.Email, &verifyEmail.SecretCode, &verifyEmail.IsUsed, &verifyEmail.ExpTime)
 	if err != nil {
 		r.log.Printf("Error while selecting verify_email data GetVerifyEmail(repo): %s\n", err.Error())
-		return -1, expTime, err
+		return &verifyEmail, err
 	}
-	return userID, expTime, nil
+	return &verifyEmail, nil
 }
 
 func (r *Repository) UpdateVerifyEmail(secretCode string) error {

@@ -6,8 +6,10 @@ import (
 )
 
 var (
-	JWTKey      = []byte("sercet_key")
-	EmtpyString = ""
+	JWTKey                    = []byte("sercet_key")
+	EmtpyString               = ""
+	VerificationLinkURL       = "http://92.38.48.85:80/auth/confirmUserAccount?link="
+	NilID               int64 = -1
 )
 
 type User struct {
@@ -41,10 +43,12 @@ type Credentials struct {
 
 type Claims struct {
 	Email string `json:"email"`
+	Sub   int64  `json:"sub"`
 	Level string `json:"level"`
 	jwt.StandardClaims
 }
 
+// struct for jsopn decoding for update user info
 type UpdateJson struct {
 	Token    TokenData `json:"jwtToken"`
 	UserInfo User      `json:"userInfo"`
@@ -55,3 +59,7 @@ type TokenData struct {
 }
 
 type event struct{}
+
+type ResponseJSON struct {
+	Message string
+}
