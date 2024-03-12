@@ -85,8 +85,9 @@ func (r *Repository) UpdateUser(user *entity.User) error {
         age = $5,
         phone_number = $6,
         city_of_residence = $7,
-        description = $8
-    WHERE id = $9
+        description = $8,
+        is_email_verified = $9
+    WHERE id = $10
 `)
 	if err != nil {
 		r.log.Printf("Error while preparing data to UpdateUser(repo) by id: %s\n", err.Error())
@@ -108,6 +109,7 @@ func (r *Repository) UpdateUser(user *entity.User) error {
 		user.PhoneNum,
 		user.ResidenceCity,
 		user.Description,
+		user.IsEmailVerified,
 		user.ID, // Assuming ID is the 12th parameter in your query
 	)
 	if err != nil {
