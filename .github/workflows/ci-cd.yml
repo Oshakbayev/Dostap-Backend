@@ -28,7 +28,7 @@ jobs:
           password: qG5hZ7bC1j
           script: |
             cd Dostap-Backend
-            git pull origin main
+            git pull origin main --rebase
             lsof -i :80
             pkill dostapp
             lsof -i :80
