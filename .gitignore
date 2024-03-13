@@ -1,3 +1,5 @@
- .idea
- bin
- logs/logs.log
+.idea/
+bin
+logs/
+dosapp
+dosapp.out
