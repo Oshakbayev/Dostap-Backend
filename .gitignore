@@ -1,4 +1,4 @@
 bin
-logs/
+logs/logs.log
 dostapp
 dostapp.out
