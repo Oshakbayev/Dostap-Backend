@@ -2,3 +2,6 @@ bin
 logs/logs.log
 dostapp
 dostapp.out
+server.crt
+server.key
+server.csr
