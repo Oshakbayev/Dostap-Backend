@@ -7,7 +7,7 @@ import (
 
 // log dont work
 func CreateLogFile() *os.File {
-	logFile, err := os.Create("logs/logs.log")
+	logFile, err := os.OpenFile("logs/logs.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
