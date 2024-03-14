@@ -25,6 +25,7 @@ func main() {
 	server := pkg.InitServer(config, logger)
 	err := server.StartServer()
 	if err != nil {
+		logger.Printf("Emergency:Server crushed!!!")
 		log.Fatal(err)
 	}
 

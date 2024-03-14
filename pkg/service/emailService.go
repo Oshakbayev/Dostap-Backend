@@ -49,6 +49,7 @@ func (s *Service) CreateVerifyEmail(userID int64, emailContent, verificationLink
 	}
 	err := s.repo.CreateEmail(&email)
 	if err != nil {
+		s.log.Printf("Error in CreateVerifyEmail %s", err.Error())
 		return err
 	}
 	return nil

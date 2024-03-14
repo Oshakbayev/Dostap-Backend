@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 	"hellowWorldDeploy/pkg/entity"
 )
 
@@ -9,7 +10,8 @@ type UserInterface interface {
 	CreateUser(*entity.User) error
 	GetUserByID(int64) (*entity.User, error)
 	GetUserByEmail(string) (*entity.User, error)
-	UpdateUser(*entity.User) error
+	UpdateUserByID(*entity.User) error
+	UpdateUserEmailStatus(string, bool) error
 }
 
 func (r *Repository) CreateUser(user *entity.User) error {
@@ -71,10 +73,11 @@ func (r *Repository) GetUserByEmail(email string) (*entity.User, error) {
 		r.log.Printf("Error while to query row and scan GetUserByEmail(repo): %s\n", err.Error())
 		return nil, err
 	}
+	fmt.Println(user)
 	return user, nil
 }
 
-func (r *Repository) UpdateUser(user *entity.User) error {
+func (r *Repository) UpdateUserByID(user *entity.User) error {
 	stmt, err := r.db.Prepare(`
     UPDATE users
     SET 
@@ -90,13 +93,13 @@ func (r *Repository) UpdateUser(user *entity.User) error {
     WHERE id = $10
 `)
 	if err != nil {
-		r.log.Printf("Error while preparing data to UpdateUser(repo) by id: %s\n", err.Error())
+		r.log.Printf("Error while preparing data to UpdateUserByID(repo) by id: %s\n", err.Error())
 		return err
 	}
 	defer func(stmt *sql.Stmt) {
 		err := stmt.Close()
 		if err != nil {
-			r.log.Printf("Error at the stage of closing stmt in UpdateUser(repo): %s\n", err.Error())
+			r.log.Printf("Error at the stage of closing stmt in UpdateUserByID(repo): %s\n", err.Error())
 		}
 	}(stmt)
 
@@ -113,7 +116,32 @@ func (r *Repository) UpdateUser(user *entity.User) error {
 		user.ID, // Assuming ID is the 12th parameter in your query
 	)
 	if err != nil {
-		r.log.Printf("Error while executing UpdateUser(repo) by id: %s\n", err.Error())
+		r.log.Printf("Error while executing UpdateUserByID(repo) by id: %s\n", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) UpdateUserEmailStatus(email string, status bool) error {
+	stmt, err := r.db.Prepare(`
+    UPDATE users
+    SET
+        is_email_verified = $1
+    WHERE email = $2
+        `)
+	if err != nil {
+		r.log.Printf("Error while preparing data to UpdateUserEmailStatus(repo) by id: %s\n", err.Error())
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			r.log.Printf("Error at the stage of closing stmt in UpdateUserEmailStatus(repo): %s\n", err.Error())
+		}
+	}(stmt)
+	_, err = stmt.Exec(status, email)
+	if err != nil {
+		r.log.Printf("Error while executing UpdateUserEmailStatus(repo) by id: %s\n", err.Error())
 		return err
 	}
 	return nil

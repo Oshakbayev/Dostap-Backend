@@ -13,12 +13,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	fmt.Println(user)
 	if status, err := h.svc.SignUp(&user); err != nil {
 		h.WriteHTTPResponse(w, status, err.Error())
 		return
 	}
-	h.WriteHTTPResponse(w, http.StatusOK, "verification email has sended")
+	h.WriteHTTPResponse(w, http.StatusOK, "verification email has been sent")
 	return
 
 }
@@ -50,7 +49,7 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 		Token: signedToken,
 		Msg:   "Your jwt token",
 	}); err != nil {
-		fmt.Println("TOKEEEEEN DID NOT SENT", err)
+		fmt.Println("token did not send", err)
 	}
 }
 

@@ -28,33 +28,38 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 	}
 	user.EncryptedPass = string(hashedPass)
 	//if user has already registered but not verified
-	isExist, err, userInDB := s.CheckUserExistence(user)
+	err, userInDB := s.CheckUserExistence(user)
 	if err != nil {
+		s.log.Printf("Error in SignUp %s", err.Error())
 		return http.StatusInternalServerError, err
-	} else if isExist && !userInDB.IsEmailVerified {
+	} else if userInDB != nil && !userInDB.IsEmailVerified {
 		//update and resend
-		if err = s.repo.UpdateUser(user); err != nil {
+		user.ID = userInDB.ID
+		if err = s.repo.UpdateUserByID(user); err != nil {
 			return http.StatusInternalServerError, err
 		}
-	} else if isExist && userInDB.IsEmailVerified {
-		return http.StatusBadRequest, errors.New("user with this email already exists")
-	} else if !isExist {
+	} else if userInDB != nil && userInDB.IsEmailVerified {
+		return http.StatusBadRequest, fmt.Errorf("user with this email already exists")
+	} else if userInDB == nil {
 		//user registration
 		err = s.repo.CreateUser(user)
 		if err != nil {
 			//s.log.Printf("Error while Inserting user into the table at the service level")
-			return http.StatusInternalServerError, fmt.Errorf("error while insert new user: %v, error: %s", user, err)
+			return http.StatusInternalServerError, fmt.Errorf("error while CreateUser new user: %v, error: %s", user, err)
 		}
 	}
 	emailContent, verificationLink, err := s.VerificationEmailGenerator(user.Email)
 	if err != nil {
+		s.log.Printf("Error in SignUp %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
 	err = s.SendVerificationEmail(user.Email, emailContent)
 	if err != nil {
+		s.log.Printf("Error in SignUp %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
-	if err = s.CreateVerifyEmail(userInDB.ID, user.Email, verificationLink); err != nil {
+	if err = s.CreateVerifyEmail(user.ID, user.Email, verificationLink); err != nil {
+		s.log.Printf("Error in SignUp %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
@@ -64,12 +69,13 @@ func (s *Service) LogIn(email, pass string) (int, int64, error) {
 	user, err := s.repo.GetUserByEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return http.StatusBadRequest, entity.NilID, fmt.Errorf("no user exist with given email %s", email)
+			s.log.Printf("ErNoRows in LogIn %s", err.Error())
+			return http.StatusBadRequest, entity.NilID, fmt.Errorf("no user exist with this email %s", email)
 		}
 		return http.StatusInternalServerError, entity.NilID, err
 	}
 	if !user.IsEmailVerified {
-		return http.StatusBadRequest, -entity.NilID, fmt.Errorf("email %s did not verified", email)
+		return http.StatusBadRequest, -entity.NilID, fmt.Errorf("email %s is not verified", email)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(pass)); err != nil {
 		s.log.Printf("given password of %s is incorrect: %s", email, pass)
@@ -123,47 +129,48 @@ func (s *Service) VerifyAccount(secretCode string) (int, error) {
 	verifyEmail, err := s.repo.GetVerifyEmailBySecretCode(secretCode)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			s.log.Printf("ErrNoRows in VerifyAccount %s", err.Error())
 			return http.StatusBadRequest, errors.New("emergency: secretCode does not exist")
 		}
+		s.log.Printf("Error in VerifyAccount %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
 	//link expired
 	if verifyEmail.ExpTime.Before(time.Now()) {
+		s.log.Printf("Error in VerifyAccount %s", err.Error())
 		return http.StatusBadRequest, errors.New("link expired")
 	}
 
-	user, err := s.repo.GetUserByID(verifyEmail.UserID)
+	err = s.repo.UpdateUserEmailStatus(verifyEmail.Email, true)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			s.log.Printf("Error in VerifyAccount %s", err.Error())
 			return http.StatusBadRequest, errors.New("user does not exist")
 		}
-		return http.StatusInternalServerError, err
-	}
-	user.IsEmailVerified = true
-	err = s.repo.UpdateUser(user)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return http.StatusBadRequest, errors.New("user does not exist")
-		}
+		s.log.Printf("Error in VerifyAccount %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
 	err = s.repo.UpdateVerifyEmail(secretCode)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			s.log.Printf("Error in VerifyAccount %s", err.Error())
 			return http.StatusBadRequest, errors.New("email does not exist")
 		}
+		s.log.Printf("Error in VerifyAccount %s", err.Error())
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
 }
 
-func (s *Service) CheckUserExistence(user *entity.User) (bool, error, *entity.User) {
+func (s *Service) CheckUserExistence(user *entity.User) (error, *entity.User) {
 	sameUser, err := s.repo.GetUserByEmail(user.Email)
 	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			return false, err, nil
+		if err.Error() == "sql: no rows in result set" {
+			s.log.Printf("ErrNoRows in CheckUserExistence %s", err.Error())
+			return nil, nil
 		}
-		return false, nil, nil
+		s.log.Printf("Error in CheckUserExistence %s", err.Error())
+		return err, nil
 	}
-	return true, nil, sameUser
+	return nil, sameUser
 }
