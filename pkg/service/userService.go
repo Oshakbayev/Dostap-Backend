@@ -17,6 +17,7 @@ type UserServiceInterface interface {
 	TokenGenerator(int64, string) (string, error)
 	VerifyAccount(string) (int, error)
 	TokenChecker(string) (*entity.Claims, int, error)
+	DeleteAccount(int64) error
 }
 
 func (s *Service) SignUp(user *entity.User) (int, error) {
@@ -173,4 +174,13 @@ func (s *Service) CheckUserExistence(user *entity.User) (error, *entity.User) {
 		return err, nil
 	}
 	return nil, sameUser
+}
+
+func (s *Service) DeleteAccount(userID int64) error {
+	err := s.repo.DeleteUserByID(userID)
+	if err != nil {
+		s.log.Printf("ErrNoRows in DeleteAccount %s", err.Error())
+		return err
+	}
+	return nil
 }

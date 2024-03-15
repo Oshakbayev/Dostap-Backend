@@ -12,6 +12,7 @@ type UserInterface interface {
 	GetUserByEmail(string) (*entity.User, error)
 	UpdateUserByID(*entity.User) error
 	UpdateUserEmailStatus(string, bool) error
+	DeleteUserByID(int64) error
 }
 
 func (r *Repository) CreateUser(user *entity.User) error {
@@ -142,6 +143,27 @@ func (r *Repository) UpdateUserEmailStatus(email string, status bool) error {
 	_, err = stmt.Exec(status, email)
 	if err != nil {
 		r.log.Printf("\nError while executing UpdateUserEmailStatus(repo) by id: %s\n", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) DeleteUserByID(userID int64) error {
+	stmt, err := r.db.Prepare("DELETE FROM users WHERE id = $1")
+	if err != nil {
+		r.log.Printf("\nError while preparing data to DeleteUserByID(repo) by id: %s\n", err.Error())
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			r.log.Printf("\nError at the stage of closing stmt in DeleteUserByID(repo): %s\n", err.Error())
+		}
+	}(stmt)
+
+	_, err = stmt.Exec(userID)
+	if err != nil {
+		r.log.Printf("\nError while executing DeleteUserByID(repo) by id: %s\n", err.Error())
 		return err
 	}
 	return nil

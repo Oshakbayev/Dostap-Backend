@@ -30,9 +30,10 @@ func (h *Handler) Routers() {
 	h.route.Post("/signup", h.SignUp)
 	h.route.Post("/login", h.LogIn)
 	h.route.Get("/auth/confirmUserAccount", h.ConfirmAccount)
-	h.route.Post("/updateProfile", h.ProfileEdit)
+	h.route.Put("/updateProfile", h.ProfileEdit)
 	h.route.Get("/createEvent", h.CreateEvent)
 	h.route.Get("/", h.TempHome)
+	h.route.Put("/deleteAccount", h.DeleteAccount)
 	//h.route.Post("/login", h.LogIn)
 
 }
