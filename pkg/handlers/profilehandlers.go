@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"hellowWorldDeploy/pkg/entity"
 	"net/http"
 )
@@ -35,7 +34,6 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	decodedClaims, status, err := h.svc.TokenChecker(updateJson.Token.Token)
-	fmt.Println(decodedClaims.Sub)
 	if err != nil {
 		h.WriteHTTPResponse(w, status, "Token "+updateJson.Token.Token+" is invalid: "+err.Error())
 		return
@@ -43,6 +41,7 @@ func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	err = h.svc.DeleteAccount(decodedClaims.Sub)
 	if err != nil {
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 	h.WriteHTTPResponse(w, http.StatusOK, "user deleted")
 }

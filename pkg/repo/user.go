@@ -161,10 +161,21 @@ func (r *Repository) DeleteUserByID(userID int64) error {
 		}
 	}(stmt)
 
-	_, err = stmt.Exec(userID)
+	result, err := stmt.Exec(userID)
 	if err != nil {
 		r.log.Printf("\nError while executing DeleteUserByID(repo) by id: %s\n", err.Error())
 		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		r.log.Printf("\nerror getting rows affected; DeleteUserByID(repo): %s\n", err.Error())
+		return fmt.Errorf("error getting rows affected: %v", err)
+	}
+
+	if rowsAffected == 0 {
+		r.log.Printf("\nno user found with ID; DeleteUserByID(repo): %d\n", userID)
+		// No rows were affected, which means no user with the given ID exists
+		return fmt.Errorf("no user found with ID %d", userID)
 	}
 	return nil
 }
