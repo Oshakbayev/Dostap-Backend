@@ -4,36 +4,35 @@ import (
 	"encoding/json"
 	"hellowWorldDeploy/pkg/entity"
 	"hellowWorldDeploy/pkg/handlers/router"
-	"hellowWorldDeploy/pkg/middleware"
 	service "hellowWorldDeploy/pkg/service"
 	"log"
 	"net/http"
 )
 
 type Handler struct {
-	svc   service.SvcInterface
-	route *router.Router
-	l     *log.Logger
+	svc    service.SvcInterface
+	router *router.Router
+	l      *log.Logger
 }
 
 func CreateHandler(svc service.SvcInterface, route *router.Router, l *log.Logger) Handler {
-	return Handler{svc: svc, route: route, l: l}
+	return Handler{svc: svc, router: route, l: l}
 }
 
-func (h *Handler) HTTPHandle() *http.ServeMux {
+func (h *Handler) InitRoutes() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle("/", middleware.Middleware(h.route))
+	mux.Handle("/", h.RunMiddlewares())
 	return mux
 }
 
 func (h *Handler) Routers() {
-	h.route.Post("/signup", h.SignUp)
-	h.route.Post("/login", h.LogIn)
-	h.route.Get("/auth/confirmUserAccount", h.ConfirmAccount)
-	h.route.Put("/updateProfile", h.ProfileEdit)
-	h.route.Get("/createEvent", h.CreateEvent)
-	h.route.Get("/", h.TempHome)
-	h.route.Put("/deleteAccount", h.DeleteAccount)
+	h.router.Post("/signup", h.SignUp, nil)
+	h.router.Post("/login", h.LogIn, nil)
+	h.router.Get("/auth/confirmUserAccount", h.ConfirmAccount, nil)
+	h.router.Put("/updateProfile", h.ProfileEdit, []router.Middleware{h.AuthMiddleware})
+	h.router.Post("/createEvent", h.CreateEvent, []router.Middleware{h.AuthMiddleware})
+	h.router.Get("/", h.TempHome, nil)
+	h.router.Put("/deleteAccount", h.DeleteAccount, []router.Middleware{h.AuthMiddleware})
 	//h.route.Post("/login", h.LogIn)
 
 }

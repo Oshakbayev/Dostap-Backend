@@ -8,6 +8,7 @@ import (
 type SvcInterface interface {
 	UserServiceInterface
 	ProfileServiceInterface
+	EventInterface
 }
 
 type Service struct {

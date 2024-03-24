@@ -32,7 +32,7 @@ func InitServer(config *configPkg.Config, logger *log.Logger) *Server {
 	handler.Routers()
 	server.httpServer = &http.Server{
 		Addr:    config.HTTPPort,
-		Handler: handler.HTTPHandle(),
+		Handler: handler.InitRoutes(),
 	}
 	return &server
 }

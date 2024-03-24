@@ -27,6 +27,20 @@ type User struct {
 	IsEmailVerified bool
 }
 
+type Event struct {
+	ID          int64
+	OrganizerID int64   `json:"organizerID"`
+	EventName   string  `json:"eventName"`
+	FormatID    int64   `json:"formatID"`
+	Address     string  `json:"address"`
+	CoordinateX float64 `json:"coordinateX"`
+	CoordinateY float64 `json:"coordinateY"`
+	EventType   int     `json:"eventType"`
+	Capacity    int     `json:"capacity"`
+	Link        string  `json:"link"`
+	Description string  `json:"description"`
+}
+
 type Email struct {
 	ID         int64
 	UserID     int64
@@ -57,8 +71,6 @@ type UpdateJson struct {
 type TokenData struct {
 	Token string
 }
-
-type event struct{}
 
 type ResponseJSON struct {
 	Message string

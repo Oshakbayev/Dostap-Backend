@@ -8,6 +8,7 @@ import (
 type RepInterface interface {
 	UserInterface
 	EmailInterface
+	EventInterface
 }
 
 type Repository struct {

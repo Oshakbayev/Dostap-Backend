@@ -74,7 +74,7 @@ func (r *Repository) GetUserByEmail(email string) (*entity.User, error) {
 		r.log.Printf("\nError while to query row and scan GetUserByEmail(repo): %s\n", err.Error())
 		return nil, err
 	}
-	fmt.Println(user)
+	//fmt.Println(user)
 	return user, nil
 }
 
