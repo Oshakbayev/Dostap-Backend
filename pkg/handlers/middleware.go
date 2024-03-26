@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"hellowWorldDeploy/pkg/handlers/router"
 	"net/http"
 	"strings"
@@ -39,7 +38,7 @@ func (h *Handler) AuthMiddleware(next router.Handler) router.Handler {
 			h.WriteHTTPResponse(w, http.StatusUnauthorized, "Invalid authorization header format")
 			return
 		}
-		fmt.Println(tokenStr, "-----This is TOKEEEEEEN")
+		//fmt.Println(tokenStr, "-----This is TOKEEEEEEN")
 		next(w, r)
 	}
 }

@@ -49,7 +49,7 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 		Token: signedToken,
 		Msg:   "Your jwt token",
 	}); err != nil {
-		fmt.Println("token did not send", err)
+		h.l.Printf("Error during sending response with %d: %v", http.StatusOK, err)
 	}
 }
 

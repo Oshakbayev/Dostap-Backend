@@ -37,6 +37,8 @@ func (h *Handler) Routers() {
 
 }
 
+//example of json body for CreateEvent function
+
 func (h *Handler) WriteHTTPResponse(w http.ResponseWriter, status int, msg string) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(status)

@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"github.com/golang-jwt/jwt"
 	"time"
+
+	"github.com/golang-jwt/jwt"
 )
 
 var (
@@ -39,6 +40,7 @@ type Event struct {
 	Capacity    int     `json:"capacity"`
 	Link        string  `json:"link"`
 	Description string  `json:"description"`
+	PrivacyID int64 `json:"privacyID"`
 }
 
 type Email struct {
