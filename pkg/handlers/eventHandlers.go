@@ -14,6 +14,8 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//log.Println(event)
+	decodedClaims := r.Context().Value("decodedClaims").(*entity.Claims)
+	event.OrganizerID = decodedClaims.Sub
 	if err := h.svc.CreateEvent(event); err != nil {
 		h.l.Printf("error createEvent() CreateEvent(handler): %v", err)
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
