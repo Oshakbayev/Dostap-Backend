@@ -32,7 +32,7 @@ func (h *Handler) Routers() {
 	h.router.Put("/updateProfile", h.ProfileEdit, []router.Middleware{h.AuthMiddleware})
 	h.router.Post("/createEvent", h.CreateEvent, []router.Middleware{h.AuthMiddleware})
 	h.router.Put("/deleteAccount", h.DeleteAccount, []router.Middleware{h.AuthMiddleware})
-	h.router.Get("/getEventsByInterests", h.GetEventsByInterests, []router.Middleware{h.AuthMiddleware})
+	h.router.Post("/getEventsByInterests", h.GetEventsByInterests, []router.Middleware{h.AuthMiddleware})
 	//h.route.Post("/login", h.LogIn)
 	//h.router.Get("/", h.TempHome, nil)
 
