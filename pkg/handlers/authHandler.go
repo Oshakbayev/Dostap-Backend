@@ -10,11 +10,13 @@ import (
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	user := entity.User{}
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		h.WriteHTTPResponse(w, http.StatusBadRequest, err.Error())
+		h.l.Printf("error with decode data in SignUp(handler): %v", err)
+		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
 	if status, err := h.svc.SignUp(&user); err != nil {
-		h.WriteHTTPResponse(w, status, err.Error())
+		h.l.Printf("error with decode data in SignUp(handler): %v", err)
+		h.WriteHTTPResponse(w, status, "599")
 		return
 	}
 	h.WriteHTTPResponse(w, http.StatusOK, "verification email has been sent")
@@ -29,6 +31,7 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	email := credentials.Email
+
 	pass := credentials.Password
 	status, userID, err := h.svc.LogIn(email, pass)
 	if err != nil {

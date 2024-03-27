@@ -1,9 +1,12 @@
 package service
 
-import "hellowWorldDeploy/pkg/entity"
+import (
+	"hellowWorldDeploy/pkg/entity"
+)
 
 type EventInterface interface {
 	CreateEvent(*entity.Event) error
+	CreateEventInterests(*entity.Event) error
 	GetEventsByInterests([]string) ([]entity.Event, error)
 }
 
@@ -13,15 +16,25 @@ func (s *Service) CreateEvent(event *entity.Event) error {
 		s.log.Printf("\nError CreateEvent(service): %s\n", err.Error())
 		return err
 	}
+	//log.Println(event.ID, "----Service")
 	return nil
 }
 
+func (s *Service) CreateEventInterests(event *entity.Event) error {
+	//log.Println(event.ID, "----createEventinterests service")
+	err := s.repo.CreateEventInterests(event.ID, event.EventInterests)
+	if err != nil {
+		s.log.Printf("\nError CreateEventInterests(service): %s\n", err.Error())
+		return err
+	}
+	return nil
+}
 
 func (s *Service) GetEventsByInterests(interests []string) ([]entity.Event, error) {
 	events, err := s.repo.GetEventsByInterests(interests)
-    if err != nil {
+	if err != nil {
 		s.log.Printf("\nError GetEventsByInterests(service): %s\n", err.Error())
-        return nil, err
-    }
-    return events, nil
+		return nil, err
+	}
+	return events, nil
 }

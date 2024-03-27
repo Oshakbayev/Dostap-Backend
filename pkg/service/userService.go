@@ -40,7 +40,7 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 			return http.StatusInternalServerError, err
 		}
 	} else if userInDB != nil && userInDB.IsEmailVerified {
-		return http.StatusBadRequest, fmt.Errorf("user with this email already exists")
+		return http.StatusBadRequest, fmt.Errorf("498 user with this email already exists")
 	} else if userInDB == nil {
 		//user registration
 		err = s.repo.CreateUser(user)
@@ -71,16 +71,16 @@ func (s *Service) LogIn(email, pass string) (int, int64, error) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			s.log.Printf("ErNoRows in LogIn %s", err.Error())
-			return http.StatusBadRequest, entity.NilID, fmt.Errorf("no user exist with this email %s", email)
+			return http.StatusBadRequest, entity.NilID, fmt.Errorf("497 no user exist with this email %s", email)
 		}
 		return http.StatusInternalServerError, entity.NilID, err
 	}
 	if !user.IsEmailVerified {
-		return http.StatusBadRequest, -entity.NilID, fmt.Errorf("email %s is not verified", email)
+		return http.StatusBadRequest, -entity.NilID, fmt.Errorf(" 496 email %s is not verified", email)
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(pass)); err != nil {
 		s.log.Printf("given password of %s is incorrect: %s", email, pass)
-		return http.StatusBadRequest, entity.NilID, fmt.Errorf("given password of %s is incorrect: %s", email, pass)
+		return http.StatusBadRequest, entity.NilID, fmt.Errorf(" 495 given password of %s is incorrect: %s", email, pass)
 	}
 	return http.StatusOK, user.ID, nil
 }
