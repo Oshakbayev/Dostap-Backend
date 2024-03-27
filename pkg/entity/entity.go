@@ -41,7 +41,7 @@ type Event struct {
 	Link           string   `json:"link"`
 	Description    string   `json:"description"`
 	PrivacyID      int64    `json:"privacyID"`
-	EventInterests []string `json:"eventInterests"`
+	EventInterests []string `json:"eventInterestsID"`
 }
 
 type Email struct {
