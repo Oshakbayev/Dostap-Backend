@@ -101,7 +101,7 @@ func (r *Repository) GetFriendRequestByID(request int64) (*entity.FriendRequest,
 }
 
 func (r *Repository) GetFriendRequestsByRecipientID(recipientID int64) ([]entity.FriendRequest, error) {
-	rows, err := r.db.Query(`SELECT * FROM friend_requests WHERE recipient_id = $1`, recipientID)
+	rows, err := r.db.Query(`SELECT * FROM friend_requests WHERE recipient_id = $1 and is_accepted = false`, recipientID)
 	if err != nil {
 		r.log.Printf("\nError at the stage of data Selecting GetFriendRequestsByRecipientID(repo): %s\n", err.Error())
 		return nil, err
