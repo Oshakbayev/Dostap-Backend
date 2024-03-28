@@ -33,6 +33,9 @@ func (h *Handler) Routers() {
 	h.router.Post("/createEvent", h.CreateEvent, []router.Middleware{h.AuthMiddleware})
 	h.router.Put("/deleteAccount", h.DeleteAccount, []router.Middleware{h.AuthMiddleware})
 	h.router.Post("/getEventsByInterests", h.GetEventsByInterests, []router.Middleware{h.AuthMiddleware})
+	h.router.Post("/createFriendRequest", h.CreateFriendRequest, []router.Middleware{h.AuthMiddleware})
+	h.router.Put("/friendRequestAnswer", h.FriendRequestAnswer, []router.Middleware{h.AuthMiddleware})
+	h.router.Post("/getFriendRequests", h.GetFriendRequests, []router.Middleware{h.AuthMiddleware})
 	//h.route.Post("/login", h.LogIn)
 	//h.router.Get("/", h.TempHome, nil)
 

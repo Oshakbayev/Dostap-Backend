@@ -69,7 +69,7 @@ func (r *Repository) GetEventsByInterests(interestList []string) ([]entity.Event
 		event := entity.Event{}
 		err = rows.Scan(&event.ID, &event.OrganizerID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID)
 		if err != nil {
-			r.log.Printf("\n error during scaning GetEventByInterests(repo): %s\n", err.Error())
+			r.log.Printf("\n error during scanning GetEventByInterests(repo): %s\n", err.Error())
 			return nil, err
 		}
 		filteredEvents = append(filteredEvents, event)

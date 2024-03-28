@@ -9,7 +9,7 @@ import (
 func (h *Handler) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	var updateJson entity.UpdateJson
 	if err := json.NewDecoder(r.Body).Decode(&updateJson); err != nil {
-		h.WriteHTTPResponse(w, http.StatusUnauthorized, err.Error())
+		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
 	user := updateJson.UserInfo

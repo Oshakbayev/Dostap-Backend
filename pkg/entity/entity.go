@@ -78,3 +78,10 @@ type TokenData struct {
 type ResponseJSON struct {
 	Message string
 }
+
+type FriendRequest struct {
+	ID          int64
+	SenderID    int64 `json:"senderID"`
+	RecipientID int64 `json:"recipientID"`
+	IsAccepted  bool
+}

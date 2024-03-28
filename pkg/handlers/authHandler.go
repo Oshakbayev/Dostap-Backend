@@ -27,7 +27,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	var credentials entity.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
-		h.WriteHTTPResponse(w, http.StatusBadRequest, err.Error())
+		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
 	email := credentials.Email

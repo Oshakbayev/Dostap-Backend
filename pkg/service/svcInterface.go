@@ -9,6 +9,7 @@ type SvcInterface interface {
 	UserServiceInterface
 	ProfileServiceInterface
 	EventInterface
+	FriendInterface
 }
 
 type Service struct {
