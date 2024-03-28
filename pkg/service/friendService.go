@@ -6,6 +6,7 @@ type FriendInterface interface {
 	CreateFriendRequest(entity.FriendRequest) error
 	EditFriendRequestStatus(int64, bool) error
 	GetFriendRequestsByRecipientID(int64) ([]entity.FriendRequest, error)
+	DeleteFriend(int64, int64) error
 }
 
 func (s *Service) CreateFriendRequest(freq entity.FriendRequest) error {
@@ -48,4 +49,13 @@ func (s *Service) GetFriendRequestsByRecipientID(recipientID int64) ([]entity.Fr
 		return nil, err
 	}
 	return friendRequests, nil
+}
+
+func (s *Service) DeleteFriend(friendID1, friendID2 int64) error {
+	err := s.repo.DeleteFriend(friendID1, friendID2)
+	if err != nil {
+		s.log.Printf("error during  GetFriendRequestsByRecipientID(service): %v", err)
+		return err
+	}
+	return nil
 }

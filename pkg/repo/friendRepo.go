@@ -12,6 +12,7 @@ type FriendInterface interface {
 	CreateFriends(int64, int64) error
 	GetFriendRequestByID(int64) (*entity.FriendRequest, error)
 	GetFriendRequestsByRecipientID(int64) ([]entity.FriendRequest, error)
+	DeleteFriend(int64, int64) error
 }
 
 func (r *Repository) CreateFriendRequest(request entity.FriendRequest) error {
@@ -117,4 +118,14 @@ func (r *Repository) GetFriendRequestsByRecipientID(recipientID int64) ([]entity
 		requestArray = append(requestArray, result)
 	}
 	return requestArray, nil
+}
+
+func (r *Repository) DeleteFriend(friendID1, friendID2 int64) error {
+	_, err := r.db.Query(`DELETE FROM friends 
+	WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`, friendID1, friendID2)
+	if err != nil {
+		r.log.Printf("\nError at the stage of data Selecting DeleteFriend(repo): %s\n", err.Error())
+		return err
+	}
+	return nil
 }

@@ -36,6 +36,7 @@ func (h *Handler) Routers() {
 	h.router.Post("/createFriendRequest", h.CreateFriendRequest, []router.Middleware{h.AuthMiddleware})
 	h.router.Put("/friendRequestAnswer", h.FriendRequestAnswer, []router.Middleware{h.AuthMiddleware})
 	h.router.Get("/getFriendRequests", h.GetFriendRequests, []router.Middleware{h.AuthMiddleware})
+	h.router.Post("/deleteFriend", h.DeleteFriend, []router.Middleware{h.AuthMiddleware})
 	//h.route.Post("/login", h.LogIn)
 	//h.router.Get("/", h.TempHome, nil)
 

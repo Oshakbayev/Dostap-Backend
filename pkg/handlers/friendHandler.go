@@ -52,3 +52,19 @@ func (h *Handler) GetFriendRequests(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (h *Handler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
+	friendID1 := r.Context().Value("decodedClaims").(*entity.Claims).Sub
+	var reqBody map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
+		return
+	}
+	friendID2 := int64(reqBody["friendID"].(float64))
+	err := h.svc.DeleteFriend(friendID1, friendID2)
+	if err != nil {
+		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	h.WriteHTTPResponse(w, http.StatusOK, "friend deleted!")
+}
