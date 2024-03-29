@@ -10,6 +10,7 @@ type RepInterface interface {
 	EmailInterface
 	EventInterface
 	FriendInterface
+	InterestInterface
 }
 
 type Repository struct {

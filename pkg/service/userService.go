@@ -13,8 +13,8 @@ import (
 
 type UserServiceInterface interface {
 	SignUp(*entity.User) (int, error)
-	LogIn(string, string) (int, int64, error)
-	TokenGenerator(int64, string) (string, error)
+	LogIn(*entity.Credentials) (*entity.User, error)
+	TokenGenerator(int64, string, string) (string, error)
 	VerifyAccount(string) (int, error)
 	TokenChecker(string) (*entity.Claims, int, error)
 	DeleteAccount(int64) error
@@ -66,31 +66,36 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (s *Service) LogIn(email, pass string) (int, int64, error) {
-	user, err := s.repo.GetUserByEmail(email)
+func (s *Service) LogIn(credentials *entity.Credentials) (*entity.User, error) {
+	user := &entity.User{}
+	var err error
+	if credentials.Username != "" {
+		user, err = s.repo.GetUserByUsername(credentials.Username)
+	} else if credentials.Email != "" {
+		user, err = s.repo.GetUserByEmail(credentials.Email)
+	} else {
+		return nil, fmt.Errorf("492")
+	}
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			s.log.Printf("ErNoRows in LogIn %s", err.Error())
-			return http.StatusBadRequest, entity.NilID, fmt.Errorf("497 no user exist with this email %s", email)
-		}
-		return http.StatusInternalServerError, entity.NilID, err
+		return nil, err
 	}
 	if !user.IsEmailVerified {
-		return http.StatusBadRequest, -entity.NilID, fmt.Errorf(" 496 email %s is not verified", email)
+		return nil, fmt.Errorf(" 496 email %s is not verified", user.Email)
 	}
-	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(pass)); err != nil {
-		s.log.Printf("given password of %s is incorrect: %s", email, pass)
-		return http.StatusBadRequest, entity.NilID, fmt.Errorf(" 495 given password of %s is incorrect: %s", email, pass)
+	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(credentials.Password)); err != nil {
+		s.log.Printf("given password  is incorrect: %s", credentials.Password)
+		return nil, fmt.Errorf(" 495 given password is incorrect: %s", credentials.Password)
 	}
-	return http.StatusOK, user.ID, nil
+	return user, nil
 }
 
-func (s *Service) TokenGenerator(userID int64, email string) (string, error) {
+func (s *Service) TokenGenerator(userID int64, email, username string) (string, error) {
 	expTime := time.Now().Add(time.Hour * 48)
 	claims := &entity.Claims{
-		Email: email,
-		Level: "user",
-		Sub:   userID,
+		Email:    email,
+		Level:    "user",
+		Sub:      userID,
+		Username: username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expTime.Unix(),
 		},

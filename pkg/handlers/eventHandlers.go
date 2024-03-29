@@ -15,18 +15,13 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	//log.Println(event)
 	decodedClaims := r.Context().Value("decodedClaims").(*entity.Claims)
-	event.OrganizerID = decodedClaims.Sub
+	event.CreatorID = decodedClaims.Sub
 	if err := h.svc.CreateEvent(event); err != nil {
 		h.l.Printf("error createEvent() CreateEvent(handler): %v", err)
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	//log.Println(event.ID, "----Handler")
-	if err := h.svc.CreateEventInterests(event); err != nil {
-		h.l.Printf("error createEventInterests() CreateEvent(handler): %v", err)
-		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
-		return
-	}
 	h.WriteHTTPResponse(w, http.StatusOK, "Event created!")
 }
 
@@ -39,6 +34,7 @@ func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
 	}
 	events, err := h.svc.GetEventsByInterests(interests)
 	if err != nil {
+
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -13,10 +13,11 @@ type UserInterface interface {
 	UpdateUserByID(*entity.User) error
 	UpdateUserEmailStatus(string, bool) error
 	DeleteUserByID(int64) error
+	GetUserByUsername(string) (*entity.User, error)
 }
 
 func (r *Repository) CreateUser(user *entity.User) error {
-	stmt, err := r.db.Prepare(`INSERT INTO users (first_name, last_name, password, avatar_link, gender, age, phone_number, city_of_residence, description,email) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10) RETURNING id`)
+	stmt, err := r.db.Prepare(`INSERT INTO users (first_name, last_name, password, avatar_link, gender, age, phone_number, city_of_residence, description,email,username) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11) RETURNING id`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data to Insert CreateUser(repo):%s\n", err.Error())
 		return err
@@ -27,7 +28,7 @@ func (r *Repository) CreateUser(user *entity.User) error {
 			r.log.Printf("\nError at the stage of closing stmt CreateUser(repo): %s\n", err.Error())
 		}
 	}(stmt)
-	err = stmt.QueryRow(user.FirstName, user.LastName, user.EncryptedPass, user.AvatarLink, user.Gender, user.Age, user.PhoneNum, user.ResidenceCity, user.Description, user.Email).Scan(&user.ID)
+	err = stmt.QueryRow(user.FirstName, user.LastName, user.EncryptedPass, user.AvatarLink, user.Gender, user.Age, user.PhoneNum, user.ResidenceCity, user.Description, user.Email, user.Username).Scan(&user.ID)
 	if err != nil {
 		r.log.Printf("\nError at the stage of data Inserting CreateUser(repo): %s\n", err.Error())
 		return err
@@ -36,7 +37,7 @@ func (r *Repository) CreateUser(user *entity.User) error {
 }
 
 func (r *Repository) GetUserByID(ID int64) (*entity.User, error) {
-	stmt, err := r.db.Prepare("SELECT id,first_name,last_name,password,avatar_link,gender,age,phone_number,city_of_residence,description,email,is_email_verified FROM users WHERE id = $1")
+	stmt, err := r.db.Prepare("SELECT * FROM users WHERE id = $1")
 	if err != nil {
 		r.log.Printf("\nError while to prepare data to GetUserByID(repo) from user table: %s\n", err.Error())
 		return nil, err
@@ -48,7 +49,7 @@ func (r *Repository) GetUserByID(ID int64) (*entity.User, error) {
 		}
 	}(stmt)
 	user := &entity.User{}
-	err = stmt.QueryRow(ID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.EncryptedPass, &user.AvatarLink, &user.Gender, &user.Age, &user.PhoneNum, &user.ResidenceCity, &user.Description, &user.Email, &user.IsEmailVerified)
+	err = stmt.QueryRow(ID).Scan(&user.ID, &user.FirstName, &user.LastName, &user.EncryptedPass, &user.AvatarLink, &user.Gender, &user.Age, &user.PhoneNum, &user.ResidenceCity, &user.Description, &user.Email, &user.IsEmailVerified, user.Username)
 	if err != nil {
 		r.log.Printf("\nError while to query row and scan user to GetUserByID(repo): %s\n", err.Error())
 		return nil, err
@@ -57,7 +58,7 @@ func (r *Repository) GetUserByID(ID int64) (*entity.User, error) {
 }
 
 func (r *Repository) GetUserByEmail(email string) (*entity.User, error) {
-	stmt, err := r.db.Prepare("SELECT id,first_name,last_name,password,avatar_link,gender,age,phone_number,city_of_residence,description,email,is_email_verified FROM users WHERE email = $1")
+	stmt, err := r.db.Prepare("SELECT * FROM users WHERE email = $1")
 	if err != nil {
 		r.log.Printf("\nError while to prepare data to GetUserByEmail(repo) from user table: %s\n", err.Error())
 		return nil, err
@@ -69,7 +70,23 @@ func (r *Repository) GetUserByEmail(email string) (*entity.User, error) {
 		}
 	}(stmt)
 	user := &entity.User{}
-	err = stmt.QueryRow(email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.EncryptedPass, &user.AvatarLink, &user.Gender, &user.Age, &user.PhoneNum, &user.ResidenceCity, &user.Description, &user.Email, &user.IsEmailVerified)
+	err = stmt.QueryRow(email).Scan(&user.ID, &user.FirstName, &user.LastName, &user.EncryptedPass, &user.AvatarLink, &user.Gender, &user.Age, &user.PhoneNum, &user.ResidenceCity, &user.Description, &user.Email, &user.IsEmailVerified, &user.Username)
+	if err != nil {
+		r.log.Printf("\nError while to query row and scan GetUserByEmail(repo): %s\n", err.Error())
+		return nil, err
+	}
+	//fmt.Println(user)
+	return user, nil
+}
+
+func (r *Repository) GetUserByUsername(username string) (*entity.User, error) {
+	row, err := r.db.Query("SELECT * FROM users WHERE username = $1", username)
+	if err != nil {
+		r.log.Printf("\nError while to prepare data to GetUserByEmail(repo) from user table: %s\n", err.Error())
+		return nil, err
+	}
+	user := &entity.User{}
+	err = row.Scan(&user.ID, &user.FirstName, &user.LastName, &user.EncryptedPass, &user.AvatarLink, &user.Gender, &user.Age, &user.PhoneNum, &user.ResidenceCity, &user.Description, &user.Email, &user.IsEmailVerified, &user.Username)
 	if err != nil {
 		r.log.Printf("\nError while to query row and scan GetUserByEmail(repo): %s\n", err.Error())
 		return nil, err

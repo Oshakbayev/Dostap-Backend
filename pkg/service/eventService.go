@@ -16,6 +16,16 @@ func (s *Service) CreateEvent(event *entity.Event) error {
 		s.log.Printf("\nError CreateEvent(service): %s\n", err.Error())
 		return err
 	}
+	err = s.repo.CreateEventOrganizers(event.ID, event.OrganizerIDs)
+	if err != nil {
+		s.log.Printf("\nError CreateEvent(service) during CreateEventOrganizers : %s\n", err.Error())
+		return err
+	}
+	err = s.repo.CreateEventInterests(event.ID, event.EventInterests)
+	if err != nil {
+		s.log.Printf("\nError CreateEvent(service) during CreateEventInterests : %s\n", err.Error())
+		return err
+	}
 	//log.Println(event.ID, "----Service")
 	return nil
 }

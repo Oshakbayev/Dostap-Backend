@@ -26,11 +26,13 @@ type User struct {
 	Description     string `json:"description"`
 	Email           string `json:"email"`
 	IsEmailVerified bool
+	Username        string `json:"username"`
 }
 
 type Event struct {
 	ID             int64
-	OrganizerID    int64    `json:"organizerID"`
+	CreatorID      int64
+	OrganizerIDs   []string `json:"organizerIDs"`
 	EventName      string   `json:"eventName"`
 	FormatID       int64    `json:"formatID"`
 	Address        string   `json:"address"`
@@ -55,13 +57,19 @@ type Email struct {
 
 type Credentials struct {
 	Email    string `json:"email"`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
+type Interest struct {
+	ID   int64
+	Name string
+}
 type Claims struct {
-	Email string `json:"email"`
-	Sub   int64  `json:"sub"`
-	Level string `json:"level"`
+	Email    string `json:"email"`
+	Sub      int64  `json:"sub"`
+	Level    string `json:"level"`
+	Username string `json:"username"`
 	jwt.StandardClaims
 }
 

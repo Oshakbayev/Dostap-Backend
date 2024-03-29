@@ -43,11 +43,7 @@ func (h *Handler) GetFriendRequests(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	if err = json.NewEncoder(w).Encode(struct {
-		FriendRequests []entity.FriendRequest
-	}{
-		FriendRequests: friendRequests,
-	}); err != nil {
+	if err = json.NewEncoder(w).Encode(friendRequests); err != nil {
 		h.l.Printf("Error during sending response with %d: %v", http.StatusOK, err)
 		return
 	}

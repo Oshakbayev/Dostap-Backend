@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"hellowWorldDeploy/pkg/entity"
 	"net/http"
@@ -30,19 +32,22 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
-	email := credentials.Email
 
-	pass := credentials.Password
-	status, userID, err := h.svc.LogIn(email, pass)
+	user, err := h.svc.LogIn(&credentials)
 	if err != nil {
-		h.WriteHTTPResponse(w, status, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			h.l.Printf("ErrNoRows in LogIn(handler) %s", err.Error())
+			h.WriteHTTPResponse(w, http.StatusBadRequest, "497"+user.Username+user.Email)
+			//return http.StatusBadRequest, entity.NilID, fmt.Errorf("497 no user exist with this email or username %s", credentials.Email+credentials.Username)
+			return
+		}
+		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	signedToken, err := h.svc.TokenGenerator(userID, email)
+	signedToken, err := h.svc.TokenGenerator(user.ID, user.Email, user.Username)
 	if err != nil {
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 	}
-
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(struct {

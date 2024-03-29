@@ -10,10 +10,11 @@ type EventInterface interface {
 	CreateEvent(event *entity.Event) error
 	GetEventsByInterests([]string) ([]entity.Event, error)
 	CreateEventInterests(int64, []string) error
+	CreateEventOrganizers(eventID int64, organizers []string) error
 }
 
 func (r *Repository) CreateEvent(event *entity.Event) error {
-	stmt, err := r.db.Prepare(`INSERT INTO events (organizer_id, event_name, format_id, address, coordinatex, coordinatey, capacity, link, description,privacy_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10) RETURNING id`)
+	stmt, err := r.db.Prepare(`INSERT INTO events (event_name, format_id, address, coordinatex, coordinatey, capacity, link, description,privacy_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10) RETURNING id`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data to Insert CreateEvent(repo):%s\n", err.Error())
 		return err
@@ -24,7 +25,7 @@ func (r *Repository) CreateEvent(event *entity.Event) error {
 			r.log.Printf("\nError at the stage of closing stmt CreateEvent(repo): %s\n", err.Error())
 		}
 	}(stmt)
-	err = stmt.QueryRow(event.OrganizerID, event.EventName, event.FormatID, event.Address, event.CoordinateX, event.CoordinateY, event.Capacity, event.Link, event.Description, event.PrivacyID).Scan(&event.ID)
+	err = stmt.QueryRow(event.EventName, event.FormatID, event.Address, event.CoordinateX, event.CoordinateY, event.Capacity, event.Link, event.Description, event.PrivacyID).Scan(&event.ID)
 	if err != nil {
 		r.log.Printf("\nError at the stage of data Inserting CreateEvent(repo): %s\n", err.Error())
 		return err
@@ -32,6 +33,14 @@ func (r *Repository) CreateEvent(event *entity.Event) error {
 	return nil
 }
 
+func (r *Repository) CreateEventOrganizers(eventID int64, organizers []string) error {
+	_, err := r.db.Exec(`INSERT INTO event_organizers (event_id, organizer_id) VALUES ($1,unnest(string_to_array($2, ','))::int)`, eventID, organizers)
+	if err != nil {
+		r.log.Printf("\nError in CreateEventOrganizers(repo) during inserting: %s\n", err.Error())
+		return err
+	}
+	return nil
+}
 func (r *Repository) CreateEventInterests(eventID int64, interestList []string) error {
 	stmt, err := r.db.Prepare(`INSERT INTO event_interests (event_id, interest_id) VALUES ($1,unnest(string_to_array($2, ','))::int)`)
 	if err != nil {
@@ -53,6 +62,11 @@ func (r *Repository) CreateEventInterests(eventID int64, interestList []string) 
 	return nil
 }
 
+//func (r *Repository) GetAllEvents() ([]entity.Event, error) {
+//	query := ``
+//	rows, err := r.db.Query()
+//}
+
 func (r *Repository) GetEventsByInterests(interestList []string) ([]entity.Event, error) {
 	query := `SELECT DISTINCT e.*
 	FROM event_interests ei
@@ -67,7 +81,7 @@ func (r *Repository) GetEventsByInterests(interestList []string) ([]entity.Event
 	filteredEvents := make([]entity.Event, 0)
 	for rows.Next() {
 		event := entity.Event{}
-		err = rows.Scan(&event.ID, &event.OrganizerID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID)
+		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID)
 		if err != nil {
 			r.log.Printf("\n error during scanning GetEventByInterests(repo): %s\n", err.Error())
 			return nil, err

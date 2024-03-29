@@ -10,6 +10,7 @@ type SvcInterface interface {
 	ProfileServiceInterface
 	EventInterface
 	FriendInterface
+	InterestInterface
 }
 
 type Service struct {
