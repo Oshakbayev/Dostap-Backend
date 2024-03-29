@@ -44,11 +44,7 @@ func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err = json.NewEncoder(w).Encode(struct {
-		Events []entity.Event
-	}{
-		Events: events,
-	}); err != nil {
+	if err = json.NewEncoder(w).Encode(events); err != nil {
 		h.l.Printf("Error during sending response with %d: %v", http.StatusOK, err)
 		return
 	}
