@@ -30,20 +30,20 @@ type User struct {
 }
 
 type Event struct {
-	ID             int64
-	CreatorID      int64
-	OrganizerIDs   []string `json:"organizerIDs"`
-	EventName      string   `json:"eventName"`
-	FormatID       int64    `json:"formatID"`
-	Address        string   `json:"address"`
-	CoordinateX    float64  `json:"coordinateX"`
-	CoordinateY    float64  `json:"coordinateY"`
-	EventType      int      `json:"eventType"`
-	Capacity       int      `json:"capacity"`
-	Link           string   `json:"link"`
-	Description    string   `json:"description"`
-	PrivacyID      int64    `json:"privacyID"`
-	EventInterests []string `json:"eventInterestsID"`
+	ID               int64
+	CreatorID        int64
+	OrganizerIDs     []string `json:"organizerIDs"`
+	EventName        string   `json:"eventName"`
+	FormatID         int64    `json:"formatID"`
+	Address          string   `json:"address"`
+	CoordinateX      float64  `json:"coordinateX"`
+	CoordinateY      float64  `json:"coordinateY"`
+	EventType        int      `json:"eventType"`
+	Capacity         int      `json:"capacity"`
+	Link             string   `json:"link"`
+	Description      string   `json:"description"`
+	PrivacyID        int64    `json:"privacyID"`
+	EventInterestIDs []string `json:"eventInterestIDs"`
 }
 
 type Email struct {

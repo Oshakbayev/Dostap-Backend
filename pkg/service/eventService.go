@@ -6,8 +6,8 @@ import (
 
 type EventInterface interface {
 	CreateEvent(*entity.Event) error
-	CreateEventInterests(*entity.Event) error
 	GetEventsByInterests([]string) ([]entity.Event, error)
+	GetAllEvents() ([]entity.Event, error)
 }
 
 func (s *Service) CreateEvent(event *entity.Event) error {
@@ -21,7 +21,7 @@ func (s *Service) CreateEvent(event *entity.Event) error {
 		s.log.Printf("\nError CreateEvent(service) during CreateEventOrganizers : %s\n", err.Error())
 		return err
 	}
-	err = s.repo.CreateEventInterests(event.ID, event.EventInterests)
+	err = s.repo.CreateEventInterests(event.ID, event.EventInterestIDs)
 	if err != nil {
 		s.log.Printf("\nError CreateEvent(service) during CreateEventInterests : %s\n", err.Error())
 		return err
@@ -30,20 +30,19 @@ func (s *Service) CreateEvent(event *entity.Event) error {
 	return nil
 }
 
-func (s *Service) CreateEventInterests(event *entity.Event) error {
-	//log.Println(event.ID, "----createEventinterests service")
-	err := s.repo.CreateEventInterests(event.ID, event.EventInterests)
-	if err != nil {
-		s.log.Printf("\nError CreateEventInterests(service): %s\n", err.Error())
-		return err
-	}
-	return nil
-}
-
 func (s *Service) GetEventsByInterests(interests []string) ([]entity.Event, error) {
 	events, err := s.repo.GetEventsByInterests(interests)
 	if err != nil {
 		s.log.Printf("\nError GetEventsByInterests(service): %s\n", err.Error())
+		return nil, err
+	}
+	return events, nil
+}
+
+func (s *Service) GetAllEvents() ([]entity.Event, error) {
+	events, err := s.repo.GetAllEvents()
+	if err != nil {
+		s.log.Printf("\nError GetAllEvents(service): %s\n", err.Error())
 		return nil, err
 	}
 	return events, nil

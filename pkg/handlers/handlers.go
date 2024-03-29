@@ -38,6 +38,7 @@ func (h *Handler) Routers() {
 	h.router.Get("/getFriendRequests", h.GetFriendRequests, []router.Middleware{h.AuthMiddleware})
 	h.router.Post("/deleteFriend", h.DeleteFriend, []router.Middleware{h.AuthMiddleware})
 	h.router.Get("/getAllInterests", h.GetAllInterests, []router.Middleware{h.AuthMiddleware})
+	h.router.Get("/getAllEvents", h.GetAllEvents, []router.Middleware{h.AuthMiddleware})
 	//h.route.Post("/login", h.LogIn)
 	//h.router.Get("/", h.TempHome, nil)
 
