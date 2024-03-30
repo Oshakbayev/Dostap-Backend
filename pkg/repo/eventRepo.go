@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/lib/pq"
 	"hellowWorldDeploy/pkg/entity"
 	"strconv"
@@ -103,11 +102,9 @@ ORDER BY t1.id;
 		}
 
 		intrsArr = strings.Trim(intrsArr, "{}NULL")
-		for _, val := range intrsArr {
+		for _, val := range strings.Split(intrsArr, ",") {
 			if id, err := strconv.Atoi(string(val)); err == nil {
 				event.InterestIDs = append(event.InterestIDs, id)
-			} else if val != ',' {
-				return nil, fmt.Errorf("\ncannot convert to interestId to in in GetAllEvents(repo)\n")
 			}
 		}
 		//event.EventInterestIDs = strings.Split(intrsArr, ",")
@@ -118,10 +115,22 @@ ORDER BY t1.id;
 
 func (r *Repository) GetEventsByInterests(interestList []int) ([]entity.Event, error) {
 	interestArray := pq.Array(interestList)
-	query := `SELECT DISTINCT e.*
-	FROM event_interests ei
-	JOIN events e ON ei.event_id = e.id
-	JOIN unnest($1::int[]) AS interests_list(interest_id) ON ei.interest_id = interests_list.interest_id`
+	query := `SELECT t1.*, COALESCE(interests, '{NULL}') AS interests
+FROM (
+  SELECT events.*, ARRAY_AGG(u.username) as organizers
+  FROM events
+  LEFT JOIN event_organizers AS eo ON eo.event_id = events.id
+  LEFT JOIN users AS u ON u.id = eo.organizer_id
+  GROUP BY events.id
+) t1 LEFT JOIN (
+  SELECT event_id, ARRAY_AGG(interest_id::bigint) as interests
+  FROM event_interests
+  JOIN interests ON interests.id = event_interests.interest_id
+  GROUP BY event_id
+) t2
+ON t1.id = t2.event_id
+ORDER BY t1.id`
+
 	rows, err := r.db.Query(query, interestArray)
 	if err != nil {
 		r.log.Printf("\nError at the stage of Query GetEventByInterests(repo): %s\n", err.Error())
