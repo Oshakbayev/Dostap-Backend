@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"hellowWorldDeploy/pkg/entity"
-	"log"
 	"net/http"
 )
 
@@ -18,7 +17,7 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	decodedClaims := r.Context().Value("decodedClaims").(*entity.Claims)
 	event.CreatorID = decodedClaims.Sub
 	event.OrganizerIDs = append(event.OrganizerIDs, decodedClaims.Username)
-	log.Println(decodedClaims.Sub, decodedClaims.Username)
+	//log.Println(decodedClaims.Sub, decodedClaims.Username)
 	if err := h.svc.CreateEvent(event); err != nil {
 		h.l.Printf("error createEvent() CreateEvent(handler): %v", err)
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
@@ -35,7 +34,6 @@ func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
-	log.Println(interests)
 	events, err := h.svc.GetEventsByInterests(interests)
 	if err != nil {
 

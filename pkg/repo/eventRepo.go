@@ -103,7 +103,7 @@ ORDER BY t1.id;
 
 		intrsArr = strings.Trim(intrsArr, "{}NULL")
 		for _, val := range strings.Split(intrsArr, ",") {
-			if id, err := strconv.Atoi(string(val)); err == nil {
+			if id, err := strconv.Atoi(val); err == nil {
 				event.InterestIDs = append(event.InterestIDs, id)
 			}
 		}
@@ -129,6 +129,7 @@ FROM (
   GROUP BY event_id
 ) t2
 ON t1.id = t2.event_id
+WHERE t2.interests && $1
 ORDER BY t1.id`
 
 	rows, err := r.db.Query(query, interestArray)
@@ -138,11 +139,24 @@ ORDER BY t1.id`
 	}
 	filteredEvents := make([]entity.Event, 0)
 	for rows.Next() {
+		var orgArr string
+		var intrsArr string
 		event := entity.Event{}
-		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime)
+		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime, &orgArr, &intrsArr)
 		if err != nil {
-			r.log.Printf("\n error during scanning GetEventByInterests(repo): %s\n", err.Error())
+			r.log.Printf("\n error during scanning GetAllEvents(repo): %s\n", err.Error())
 			return nil, err
+		}
+		orgArr = strings.Trim(orgArr, "{}NULL")
+		if orgArr != "" {
+			event.OrganizerIDs = strings.Split(orgArr, ",")
+		}
+
+		intrsArr = strings.Trim(intrsArr, "{}NULL")
+		for _, val := range strings.Split(intrsArr, ",") {
+			if id, err := strconv.Atoi(val); err == nil {
+				event.InterestIDs = append(event.InterestIDs, id)
+			}
 		}
 		filteredEvents = append(filteredEvents, event)
 	}
