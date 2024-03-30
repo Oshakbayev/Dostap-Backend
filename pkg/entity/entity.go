@@ -7,14 +7,14 @@ import (
 )
 
 var (
-	JWTKey                    = []byte("sercet_key")
-	EmtpyString               = ""
-	VerificationLinkURL       = "http://92.38.48.85:80/auth/confirmUserAccount?link="
-	NilID               int64 = -1
+	JWTKey                  = []byte("sercet_key")
+	EmtpyString             = ""
+	VerificationLinkURL     = "http://92.38.48.85:80/auth/confirmUserAccount?link="
+	NilID               int = -1
 )
 
 type User struct {
-	ID              int64
+	ID              int
 	FirstName       string `json:"first_name"`
 	LastName        string `json:"last_name"`
 	EncryptedPass   string `json:"password"`
@@ -30,25 +30,26 @@ type User struct {
 }
 
 type Event struct {
-	ID               int64
-	CreatorID        int64
-	OrganizerIDs     []string `json:"organizerIDs"`
-	EventName        string   `json:"eventName"`
-	FormatID         int64    `json:"formatID"`
-	Address          string   `json:"address"`
-	CoordinateX      float64  `json:"coordinateX"`
-	CoordinateY      float64  `json:"coordinateY"`
-	EventType        int      `json:"eventType"`
-	Capacity         int      `json:"capacity"`
-	Link             string   `json:"link"`
-	Description      string   `json:"description"`
-	PrivacyID        int64    `json:"privacyID"`
-	EventInterestIDs []string `json:"eventInterestIDs"`
+	ID           int
+	CreatorID    int
+	OrganizerIDs []string  `json:"organizerIDs"`
+	EventName    string    `json:"eventName"`
+	FormatID     int       `json:"formatID"`
+	Address      string    `json:"address"`
+	CoordinateX  float64   `json:"coordinateX"`
+	CoordinateY  float64   `json:"coordinateY"`
+	Capacity     int       `json:"capacity"`
+	Link         string    `json:"link"`
+	Description  string    `json:"description"`
+	PrivacyID    int       `json:"privacyID"`
+	InterestIDs  []int     `json:"interestIDs"`
+	StartTime    time.Time `json:"startTime"`
+	EndTime      time.Time `json:"endTime"`
 }
 
 type Email struct {
-	ID         int64
-	UserID     int64
+	ID         int
+	UserID     int
 	Email      string
 	SecretCode string
 	IsUsed     bool
@@ -62,12 +63,12 @@ type Credentials struct {
 }
 
 type Interest struct {
-	ID   int64
+	ID   int
 	Name string
 }
 type Claims struct {
 	Email    string `json:"email"`
-	Sub      int64  `json:"sub"`
+	Sub      int    `json:"sub"`
 	Level    string `json:"level"`
 	Username string `json:"username"`
 	jwt.StandardClaims
@@ -88,8 +89,8 @@ type ResponseJSON struct {
 }
 
 type FriendRequest struct {
-	ID          int64
-	SenderID    int64 `json:"senderID"`
-	RecipientID int64 `json:"recipientID"`
+	ID          int
+	SenderID    int `json:"senderID"`
+	RecipientID int `json:"recipientID"`
 	IsAccepted  bool
 }

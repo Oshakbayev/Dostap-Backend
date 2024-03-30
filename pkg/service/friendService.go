@@ -4,9 +4,9 @@ import "hellowWorldDeploy/pkg/entity"
 
 type FriendInterface interface {
 	CreateFriendRequest(entity.FriendRequest) error
-	EditFriendRequestStatus(int64, bool) error
-	GetFriendRequestsByRecipientID(int64) ([]entity.FriendRequest, error)
-	DeleteFriend(int64, int64) error
+	EditFriendRequestStatus(int, bool) error
+	GetFriendRequestsByRecipientID(int) ([]entity.FriendRequest, error)
+	DeleteFriend(int, int) error
 }
 
 func (s *Service) CreateFriendRequest(freq entity.FriendRequest) error {
@@ -18,7 +18,7 @@ func (s *Service) CreateFriendRequest(freq entity.FriendRequest) error {
 	return nil
 }
 
-func (s *Service) EditFriendRequestStatus(requestID int64, status bool) error {
+func (s *Service) EditFriendRequestStatus(requestID int, status bool) error {
 	if status {
 		if err := s.repo.AcceptFriendRequest(requestID); err != nil {
 			s.log.Printf("error during AcceptFriendRequest EditFriendRequestStatus(service): %v", err)
@@ -42,7 +42,7 @@ func (s *Service) EditFriendRequestStatus(requestID int64, status bool) error {
 	return nil
 }
 
-func (s *Service) GetFriendRequestsByRecipientID(recipientID int64) ([]entity.FriendRequest, error) {
+func (s *Service) GetFriendRequestsByRecipientID(recipientID int) ([]entity.FriendRequest, error) {
 	friendRequests, err := s.repo.GetFriendRequestsByRecipientID(recipientID)
 	if err != nil {
 		s.log.Printf("error during  GetFriendRequestsByRecipientID(service): %v", err)
@@ -51,7 +51,7 @@ func (s *Service) GetFriendRequestsByRecipientID(recipientID int64) ([]entity.Fr
 	return friendRequests, nil
 }
 
-func (s *Service) DeleteFriend(friendID1, friendID2 int64) error {
+func (s *Service) DeleteFriend(friendID1, friendID2 int) error {
 	err := s.repo.DeleteFriend(friendID1, friendID2)
 	if err != nil {
 		s.log.Printf("error during  GetFriendRequestsByRecipientID(service): %v", err)

@@ -39,7 +39,7 @@ func (s *Service) SendVerificationEmail(emailAddress, emailContent string) error
 	return nil
 }
 
-func (s *Service) CreateVerifyEmail(userID int64, emailContent, verificationLink string) error {
+func (s *Service) CreateVerifyEmail(userID int, emailContent, verificationLink string) error {
 	expTime := time.Now().Add(time.Hour * 48)
 	email := entity.Email{
 		UserID:     userID,

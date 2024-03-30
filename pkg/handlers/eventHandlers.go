@@ -5,7 +5,6 @@ import (
 	"hellowWorldDeploy/pkg/entity"
 	"log"
 	"net/http"
-	"strconv"
 )
 
 func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
@@ -18,8 +17,8 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	//log.Println(event)
 	decodedClaims := r.Context().Value("decodedClaims").(*entity.Claims)
 	event.CreatorID = decodedClaims.Sub
-	event.OrganizerIDs = append(event.OrganizerIDs, strconv.FormatInt(event.CreatorID, 10))
-	log.Println(event.OrganizerIDs)
+	event.OrganizerIDs = append(event.OrganizerIDs, decodedClaims.Username)
+	log.Println(decodedClaims.Sub, decodedClaims.Username)
 	if err := h.svc.CreateEvent(event); err != nil {
 		h.l.Printf("error createEvent() CreateEvent(handler): %v", err)
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
@@ -30,12 +29,13 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
-	var interests []string
+	var interests []int
 	if err := json.NewDecoder(r.Body).Decode(&interests); err != nil {
 		h.l.Printf("error during decoding json in GetEventsByInterests(handler): %v", err)
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
+	log.Println(interests)
 	events, err := h.svc.GetEventsByInterests(interests)
 	if err != nil {
 

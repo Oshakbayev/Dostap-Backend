@@ -7,12 +7,12 @@ import (
 
 type FriendInterface interface {
 	CreateFriendRequest(entity.FriendRequest) error
-	AcceptFriendRequest(int64) error
-	DeleteFriendRequest(int64) error
-	CreateFriends(int64, int64) error
-	GetFriendRequestByID(int64) (*entity.FriendRequest, error)
-	GetFriendRequestsByRecipientID(int64) ([]entity.FriendRequest, error)
-	DeleteFriend(int64, int64) error
+	AcceptFriendRequest(int) error
+	DeleteFriendRequest(int) error
+	CreateFriends(int, int) error
+	GetFriendRequestByID(int) (*entity.FriendRequest, error)
+	GetFriendRequestsByRecipientID(int) ([]entity.FriendRequest, error)
+	DeleteFriend(int, int) error
 }
 
 func (r *Repository) CreateFriendRequest(request entity.FriendRequest) error {
@@ -34,7 +34,7 @@ func (r *Repository) CreateFriendRequest(request entity.FriendRequest) error {
 	return nil
 }
 
-func (r *Repository) AcceptFriendRequest(requestID int64) error {
+func (r *Repository) AcceptFriendRequest(requestID int) error {
 	stmt, err := r.db.Prepare(`UPDATE friend_requests SET is_accepted = true WHERE id = $1`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data AcceptFriendRequest(repo):%s\n", err.Error())
@@ -53,7 +53,7 @@ func (r *Repository) AcceptFriendRequest(requestID int64) error {
 	return nil
 }
 
-func (r *Repository) DeleteFriendRequest(requestID int64) error {
+func (r *Repository) DeleteFriendRequest(requestID int) error {
 	stmt, err := r.db.Prepare(`DELETE FROM friend_requests WHERE id = $1`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data DeleteFriendRequest(repo):%s\n", err.Error())
@@ -72,7 +72,7 @@ func (r *Repository) DeleteFriendRequest(requestID int64) error {
 	return nil
 }
 
-func (r *Repository) CreateFriends(user1ID, user2ID int64) error {
+func (r *Repository) CreateFriends(user1ID, user2ID int) error {
 	stmt, err := r.db.Prepare(`INSERT INTO  friends (user_id,friend_id) VALUES ($1,$2), ($2,$1)`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data CreateFriends(repo):%s\n", err.Error())
@@ -91,7 +91,7 @@ func (r *Repository) CreateFriends(user1ID, user2ID int64) error {
 	return nil
 }
 
-func (r *Repository) GetFriendRequestByID(request int64) (*entity.FriendRequest, error) {
+func (r *Repository) GetFriendRequestByID(request int) (*entity.FriendRequest, error) {
 	result := &entity.FriendRequest{}
 	err := r.db.QueryRow(`SELECT * FROM friend_requests WHERE id = $1`, request).Scan(&result.ID, &result.SenderID, &result.RecipientID, &result.IsAccepted)
 	if err != nil {
@@ -101,7 +101,7 @@ func (r *Repository) GetFriendRequestByID(request int64) (*entity.FriendRequest,
 	return result, nil
 }
 
-func (r *Repository) GetFriendRequestsByRecipientID(recipientID int64) ([]entity.FriendRequest, error) {
+func (r *Repository) GetFriendRequestsByRecipientID(recipientID int) ([]entity.FriendRequest, error) {
 	rows, err := r.db.Query(`SELECT * FROM friend_requests WHERE recipient_id = $1 and is_accepted = false`, recipientID)
 	if err != nil {
 		r.log.Printf("\nError at the stage of data Selecting GetFriendRequestsByRecipientID(repo): %s\n", err.Error())
@@ -120,7 +120,7 @@ func (r *Repository) GetFriendRequestsByRecipientID(recipientID int64) ([]entity
 	return requestArray, nil
 }
 
-func (r *Repository) DeleteFriend(friendID1, friendID2 int64) error {
+func (r *Repository) DeleteFriend(friendID1, friendID2 int) error {
 	_, err := r.db.Query(`DELETE FROM friends 
 	WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)`, friendID1, friendID2)
 	if err != nil {

@@ -26,8 +26,8 @@ func (h *Handler) FriendRequestAnswer(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
-	temp := reqBody["fRequestID"].(float64)
-	fRequestID := int64(temp)
+	temp := reqBody["fRequestID"].(float32)
+	fRequestID := int(temp)
 	fRequestAnswer := reqBody["answer"].(bool)
 	if err := h.svc.EditFriendRequestStatus(fRequestID, fRequestAnswer); err != nil {
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
@@ -56,7 +56,7 @@ func (h *Handler) DeleteFriend(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
-	friendID2 := int64(reqBody["friendID"].(float64))
+	friendID2 := int(reqBody["friendID"].(float64))
 	err := h.svc.DeleteFriend(friendID1, friendID2)
 	if err != nil {
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())

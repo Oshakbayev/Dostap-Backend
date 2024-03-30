@@ -14,10 +14,10 @@ import (
 type UserServiceInterface interface {
 	SignUp(*entity.User) (int, error)
 	LogIn(*entity.Credentials) (*entity.User, error)
-	TokenGenerator(int64, string, string) (string, error)
+	TokenGenerator(int, string, string) (string, error)
 	VerifyAccount(string) (int, error)
 	TokenChecker(string) (*entity.Claims, int, error)
-	DeleteAccount(int64) error
+	DeleteAccount(int) error
 }
 
 func (s *Service) SignUp(user *entity.User) (int, error) {
@@ -89,7 +89,7 @@ func (s *Service) LogIn(credentials *entity.Credentials) (*entity.User, error) {
 	return user, nil
 }
 
-func (s *Service) TokenGenerator(userID int64, email, username string) (string, error) {
+func (s *Service) TokenGenerator(userID int, email, username string) (string, error) {
 	expTime := time.Now().Add(time.Hour * 48)
 	claims := &entity.Claims{
 		Email:    email,
@@ -181,7 +181,7 @@ func (s *Service) CheckUserExistence(user *entity.User) (error, *entity.User) {
 	return nil, sameUser
 }
 
-func (s *Service) DeleteAccount(userID int64) error {
+func (s *Service) DeleteAccount(userID int) error {
 	err := s.repo.DeleteUserByID(userID)
 	if err != nil {
 		s.log.Printf("ErrNoRows in DeleteAccount %s", err.Error())
