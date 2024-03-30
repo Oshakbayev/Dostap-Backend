@@ -96,7 +96,6 @@ LEFT JOIN
         GROUP BY 
             e.id
     ) AS b ON a.id = b.id
-
 ;`
 	var allEvents []entity.Event
 	rows, err := r.db.Query(query)
