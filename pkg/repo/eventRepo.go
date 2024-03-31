@@ -162,3 +162,7 @@ ORDER BY t1.id`
 	}
 	return filteredEvents, nil
 }
+
+func Test() {
+
+}
