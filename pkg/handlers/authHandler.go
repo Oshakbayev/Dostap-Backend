@@ -18,7 +18,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	if status, err := h.svc.SignUp(&user); err != nil {
 		h.l.Printf("error with decode data in SignUp(handler): %v", err)
-		h.WriteHTTPResponse(w, status, "599")
+		h.WriteHTTPResponse(w, status, err.Error())
 		return
 	}
 	h.WriteHTTPResponse(w, http.StatusOK, "verification email has been sent")
@@ -37,7 +37,7 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			h.l.Printf("ErrNoRows in LogIn(handler) %s", err.Error())
-			h.WriteHTTPResponse(w, http.StatusBadRequest, "497"+user.Username+user.Email)
+			h.WriteHTTPResponse(w, http.StatusBadRequest, "497")
 			//return http.StatusBadRequest, entity.NilID, fmt.Errorf("497 no user exist with this email or username %s", credentials.Email+credentials.Username)
 			return
 		}

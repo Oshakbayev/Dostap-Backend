@@ -40,7 +40,7 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 			return http.StatusInternalServerError, err
 		}
 	} else if userInDB != nil && userInDB.IsEmailVerified {
-		return http.StatusBadRequest, fmt.Errorf("498 user with this email already exists")
+		return http.StatusBadRequest, fmt.Errorf("498")
 	} else if userInDB == nil {
 		//user registration
 		err = s.repo.CreateUser(user)

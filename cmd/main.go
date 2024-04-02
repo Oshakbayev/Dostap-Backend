@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+
 	config := configPkg.CreateConfig()
 	if err := configPkg.ReadConfig("cmd/config/devConfig.json", config); err != nil {
 		log.Fatal(err)
