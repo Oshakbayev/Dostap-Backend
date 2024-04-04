@@ -27,6 +27,30 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	h.WriteHTTPResponse(w, http.StatusOK, "Event created!")
 }
 
+
+func (h *Handler) UploadFile(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		h.l.Printf("error during parsing form in UploadFile(handler): %v", err)
+        h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
+        return
+	}
+
+	file, _, err := r.FormFile("picture")
+	if err!= nil {
+        h.l.Printf("error during reading file in UploadFile(handler): %v", err)
+        h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
+        return
+    }
+	defer file.Close()
+	h.svc.UploadFile(file)
+
+	
+
+	h.WriteHTTPResponse(w, http.StatusOK, "File uploaded!")
+
+	
+}
+
 func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
 	var interests []int
 	if err := json.NewDecoder(r.Body).Decode(&interests); err != nil {

@@ -18,6 +18,16 @@ type UserServiceInterface interface {
 	VerifyAccount(string) (int, error)
 	TokenChecker(string) (*entity.Claims, int, error)
 	DeleteAccount(int) error
+	GetAllUsernames() ([]string, error)
+}
+
+func (s *Service) GetAllUsernames() ([]string, error) {
+	usernames, err := s.repo.GetAllUsernames()
+	if err!= nil {
+        return nil, err
+    }
+
+	return usernames, nil
 }
 
 func (s *Service) SignUp(user *entity.User) (int, error) {

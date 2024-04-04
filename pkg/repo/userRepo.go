@@ -14,6 +14,7 @@ type UserInterface interface {
 	UpdateUserEmailStatus(string, bool) error
 	DeleteUserByID(int) error
 	GetUserByUsername(string) (*entity.User, error)
+	GetAllUsernames() ([]string, error)
 }
 
 func (r *Repository) CreateUser(user *entity.User) error {
@@ -34,6 +35,40 @@ func (r *Repository) CreateUser(user *entity.User) error {
 		return err
 	}
 	return nil
+}
+
+func (r *Repository) GetAllUsernames() ([]string, error) {
+	stmt, err := r.db.Prepare(`SELECT username FROM users`)
+	if err != nil {
+        r.log.Printf("\nError at the stage of preparing data to GetAllUsernames(repo):%s\n", err.Error())
+        return nil, err
+    }
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+        if err != nil {
+            r.log.Printf("\nError at the stage of closing stmt GetAllUsernames(repo): %s\n", err.Error())
+        }
+    }(stmt)
+
+	userNames := make([]string, 0)
+
+	rows, err := stmt.Query()
+	if err != nil {
+        r.log.Printf("\nError at the stage of Query GetAllUsernames(repo): %s\n", err.Error())
+        return nil, err
+    }
+
+	for rows.Next() {
+		var username string
+        err = rows.Scan(&username)
+        if err!= nil {
+            r.log.Printf("\nError at the stage of data GetAllUsernames(repo): %s\n", err.Error())
+            return nil, err
+        }
+        userNames = append(userNames, username)
+	}
+
+	return userNames,nil
 }
 
 func (r *Repository) GetUserByID(ID int) (*entity.User, error) {

@@ -1,5 +1,5 @@
 {
-  "HTTPPort": ":80",
+  "HTTPPort": ":1024",
   "DBAddr": "./data/forum.db",
   "DBDriver": "postgres"
 }
