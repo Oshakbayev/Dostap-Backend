@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"hellowWorldDeploy/bucket"
 	configPkg "hellowWorldDeploy/cmd/config"
 	"hellowWorldDeploy/database"
 	"hellowWorldDeploy/pkg/handlers"
@@ -17,10 +18,13 @@ type Server struct {
 	handler    handlers.Handler
 }
 
+
 func InitServer(config *configPkg.Config, logger *log.Logger) *Server {
+	client := bucket.ConnectToBucket()
+	bc := bucket.CreateBucket(logger, client)	
 	db := database.CreateDB(config.DBDriver)
 	repo := repository.CreateRepository(db, logger)
-	service := service2.CreateService(repo, logger)
+	service := service2.CreateService(repo, logger, bc)
 	route := router.NewRouter()
 	handler := handlers.CreateHandler(service, route, logger)
 
@@ -34,6 +38,8 @@ func InitServer(config *configPkg.Config, logger *log.Logger) *Server {
 		Addr:    config.HTTPPort,
 		Handler: handler.InitRoutes(),
 	}
+
+
 	return &server
 }
 

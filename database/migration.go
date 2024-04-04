@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-// change na,e to connecttoDB
+// change name to connecttoDB
 func CreateDB(DBDriver string) *sql.DB {
 	DBconnectionString := "postgres://owwkdlwj:UqnYqPkMlDPUHBntLlFYpIeLjaXZkCxR@abul.db.elephantsql.com/owwkdlwj"
 	db, err := sql.Open(DBDriver, DBconnectionString)

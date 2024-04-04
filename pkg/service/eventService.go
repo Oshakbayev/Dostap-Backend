@@ -2,12 +2,14 @@ package service
 
 import (
 	"hellowWorldDeploy/pkg/entity"
+	"mime/multipart"
 )
 
 type EventInterface interface {
 	CreateEvent(*entity.Event) error
 	GetEventsByInterests([]int) ([]entity.Event, error)
 	GetAllEvents() ([]entity.Event, error)
+	UploadFile(multipart.File) error
 }
 
 func (s *Service) CreateEvent(event *entity.Event) error {
@@ -46,4 +48,9 @@ func (s *Service) GetAllEvents() ([]entity.Event, error) {
 		return nil, err
 	}
 	return events, nil
+}
+
+func (s *Service) UploadFile(file multipart.File) error {
+	s.bc.UploadFile("test-bucket-dostap","picture.png",file)
+	return nil
 }
