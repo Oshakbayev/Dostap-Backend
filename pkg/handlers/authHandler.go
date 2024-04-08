@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"hellowWorldDeploy/pkg/entity"
 	"net/http"
 )
@@ -71,7 +70,6 @@ func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) ConfirmAccount(w http.ResponseWriter, r *http.Request) {
 	secretCode := r.FormValue("link")
-	fmt.Println(secretCode)
 	status, err := h.svc.VerifyAccount(secretCode)
 	if err != nil {
 		h.WriteHTTPResponse(w, status, err.Error())

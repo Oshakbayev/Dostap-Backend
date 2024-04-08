@@ -1,7 +1,7 @@
 package service
 
 import (
-	"hellowWorldDeploy/bucket"
+	"hellowWorldDeploy/pkg/bucket"
 	"hellowWorldDeploy/pkg/repo"
 	"log"
 )
@@ -17,7 +17,7 @@ type SvcInterface interface {
 type Service struct {
 	log  *log.Logger
 	repo repo.RepInterface
-	bc bucket.BucketInterface
+	bc   bucket.BucketInterface
 }
 
 func CreateService(repo repo.RepInterface, l *log.Logger, bc bucket.BucketInterface) SvcInterface {

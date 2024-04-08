@@ -4,19 +4,12 @@ import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"hellowWorldDeploy/pkg/entity"
-	"math/rand"
 	"net/smtp"
 	"time"
 )
 
 func (s *Service) VerificationEmailGenerator(email string) (string, string, error) {
-	rand.New(rand.NewSource(time.Now().UnixNano()))
-	allowedChars := "0123456789"
-	var result string
-	for i := 0; i < 10; i++ {
-		randomIndex := rand.Intn(len(allowedChars))
-		result += string(allowedChars[randomIndex])
-	}
+	result := s.generateRandomKey(entity.VerificationSecretCodeLength)
 	secretCode, err := bcrypt.GenerateFromPassword([]byte(result+email), bcrypt.DefaultCost)
 	if err != nil {
 		s.log.Printf("error while hashing secretCode for email verification: error error - #{err}")

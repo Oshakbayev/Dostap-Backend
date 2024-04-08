@@ -14,9 +14,12 @@ type EventBucketServiceInterface interface {
 
 func (b *Bucket) UploadFile(bucketName string, objectKey string, file multipart.File) error {
 	_, err := b.bucketClient.PutObject(context.TODO(), &s3.PutObjectInput{
-        Bucket: aws.String(bucketName),
-        Key:    aws.String(objectKey),
-        Body:   file,
-    })
-    return err
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+		Body:   file,
+	})
+	if err != nil {
+		b.log.Printf("error during insert into bucket in UploadFile(repo):%s", err.Error())
+	}
+	return err
 }

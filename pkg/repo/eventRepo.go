@@ -14,6 +14,7 @@ type EventInterface interface {
 	CreateEventInterests(int, []int) error
 	CreateEventOrganizers(int, []string) error
 	GetAllEvents() ([]entity.Event, error)
+	GetEventsByPage(int, int) ([]entity.Event, error)
 }
 
 func (r *Repository) CreateEvent(event *entity.Event) error {
@@ -163,6 +164,51 @@ ORDER BY t1.id`
 	return filteredEvents, nil
 }
 
-func Test() {
+func (r *Repository) GetEventsByPage(limit int, offset int) ([]entity.Event, error) {
+	query := `SELECT t1.*, COALESCE(interests, '{NULL}') AS interests
+FROM (
+  SELECT events.*, ARRAY_AGG(u.username) as organizers
+  FROM events
+  LEFT JOIN event_organizers AS eo ON eo.event_id = events.id
+  LEFT JOIN users AS u ON u.id = eo.organizer_id
+  GROUP BY events.id
+) t1 LEFT JOIN (
+  SELECT event_id, ARRAY_AGG(interest_id::bigint) as interests
+  FROM event_interests
+  JOIN interests ON interests.id = event_interests.interest_id
+  GROUP BY event_id
+) t2
+ON t1.id = t2.event_id
+ORDER BY t1.id
+LIMIT $1 OFFSET $2`
+	var allEvents []entity.Event
+	rows, err := r.db.Query(query, limit, offset)
+	if err != nil {
+		r.log.Printf("\nError at the stage of query GetAllEvents(repo): %s\n", err.Error())
+		return nil, err
+	}
+	for rows.Next() {
+		var orgArr string
+		var intrsArr string
+		event := entity.Event{}
+		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime, &orgArr, &intrsArr)
+		if err != nil {
+			r.log.Printf("\n error during scanning GetAllEvents(repo): %s\n", err.Error())
+			return nil, err
+		}
+		orgArr = strings.Trim(orgArr, "{}NULL")
+		if orgArr != "" {
+			event.OrganizerIDs = strings.Split(orgArr, ",")
+		}
 
+		intrsArr = strings.Trim(intrsArr, "{}NULL")
+		for _, val := range strings.Split(intrsArr, ",") {
+			if id, err := strconv.Atoi(val); err == nil {
+				event.InterestIDs = append(event.InterestIDs, id)
+			}
+		}
+		//event.EventInterestIDs = strings.Split(intrsArr, ",")
+		allEvents = append(allEvents, event)
+	}
+	return allEvents, nil
 }

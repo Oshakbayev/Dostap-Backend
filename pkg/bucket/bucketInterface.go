@@ -11,11 +11,10 @@ type BucketInterface interface {
 }
 
 type Bucket struct {
-	log *log.Logger
+	log          *log.Logger
 	bucketClient *s3.Client
 }
 
 func CreateBucket(log *log.Logger, bucketClient *s3.Client) BucketInterface {
-    return &Bucket{log: log, bucketClient: bucketClient}
+	return &Bucket{log: log, bucketClient: bucketClient}
 }
-

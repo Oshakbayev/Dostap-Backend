@@ -41,6 +41,7 @@ func (h *Handler) Routers() {
 	h.router.Get("/getAllEvents", h.GetAllEvents, []router.Middleware{h.AuthMiddleware})
 	h.router.Get("/getAllUsernames", h.GetAllUsernames, nil)
 	h.router.Post("/uploadFile", h.UploadFile, nil)
+	h.router.Get("/getEventsByPage", h.GetEventsByPage, []router.Middleware{h.AuthMiddleware})
 	//h.route.Post("/login", h.LogIn)
 	//h.router.Get("/", h.TempHome, nil)
 

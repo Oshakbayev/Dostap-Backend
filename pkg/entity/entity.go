@@ -13,6 +13,13 @@ var (
 	NilID               int = -1
 )
 
+const (
+	BucketName                   = "test-bucket-dostap"
+	VerificationSecretCodeLength = 16
+	Charset                      = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	PicturesLinkNameLength       = 32
+)
+
 type User struct {
 	ID              int
 	FirstName       string `json:"first_name"`
