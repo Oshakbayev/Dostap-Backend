@@ -18,7 +18,8 @@ type UserInterface interface {
 }
 
 func (r *Repository) CreateUser(user *entity.User) error {
-	stmt, err := r.db.Prepare(`INSERT INTO users (first_name, last_name, password, avatar_link, gender, age, phone_number, city_of_residence, description,email,username) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11) RETURNING id`)
+	tx, err := r.db.Begin()
+	stmt, err := tx.Prepare(`INSERT INTO users (first_name, last_name, password, avatar_link, gender, age, phone_number, city_of_residence, description,email,username) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11) RETURNING id`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data to Insert CreateUser(repo):%s\n", err.Error())
 		return err
@@ -32,6 +33,12 @@ func (r *Repository) CreateUser(user *entity.User) error {
 	err = stmt.QueryRow(user.FirstName, user.LastName, user.EncryptedPass, user.AvatarLink, user.Gender, user.Age, user.PhoneNum, user.ResidenceCity, user.Description, user.Email, user.Username).Scan(&user.ID)
 	if err != nil {
 		r.log.Printf("\nError at the stage of data Inserting CreateUser(repo): %s\n", err.Error())
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
+	if err != nil {
+		r.log.Printf("\nError committing transaction: %s\n", err.Error())
 		return err
 	}
 	return nil
@@ -40,35 +47,35 @@ func (r *Repository) CreateUser(user *entity.User) error {
 func (r *Repository) GetAllUsernames() ([]string, error) {
 	stmt, err := r.db.Prepare(`SELECT username FROM users`)
 	if err != nil {
-        r.log.Printf("\nError at the stage of preparing data to GetAllUsernames(repo):%s\n", err.Error())
-        return nil, err
-    }
+		r.log.Printf("\nError at the stage of preparing data to GetAllUsernames(repo):%s\n", err.Error())
+		return nil, err
+	}
 	defer func(stmt *sql.Stmt) {
 		err := stmt.Close()
-        if err != nil {
-            r.log.Printf("\nError at the stage of closing stmt GetAllUsernames(repo): %s\n", err.Error())
-        }
-    }(stmt)
+		if err != nil {
+			r.log.Printf("\nError at the stage of closing stmt GetAllUsernames(repo): %s\n", err.Error())
+		}
+	}(stmt)
 
 	userNames := make([]string, 0)
 
 	rows, err := stmt.Query()
 	if err != nil {
-        r.log.Printf("\nError at the stage of Query GetAllUsernames(repo): %s\n", err.Error())
-        return nil, err
-    }
+		r.log.Printf("\nError at the stage of Query GetAllUsernames(repo): %s\n", err.Error())
+		return nil, err
+	}
 
 	for rows.Next() {
 		var username string
-        err = rows.Scan(&username)
-        if err!= nil {
-            r.log.Printf("\nError at the stage of data GetAllUsernames(repo): %s\n", err.Error())
-            return nil, err
-        }
-        userNames = append(userNames, username)
+		err = rows.Scan(&username)
+		if err != nil {
+			r.log.Printf("\nError at the stage of data GetAllUsernames(repo): %s\n", err.Error())
+			return nil, err
+		}
+		userNames = append(userNames, username)
 	}
 
-	return userNames,nil
+	return userNames, nil
 }
 
 func (r *Repository) GetUserByID(ID int) (*entity.User, error) {
@@ -126,7 +133,7 @@ func (r *Repository) UpdateUserByID(user *entity.User) error {
         phone_number = $6,
         city_of_residence = $7,
         description = $8,
-        is_email_verified = $9
+        username = $9
     WHERE id = $10
 `)
 	if err != nil {
@@ -149,7 +156,7 @@ func (r *Repository) UpdateUserByID(user *entity.User) error {
 		user.PhoneNum,
 		user.ResidenceCity,
 		user.Description,
-		user.IsEmailVerified,
+		user.Username,
 		user.ID, // Assuming ID is the 12th parameter in your query
 	)
 	if err != nil {

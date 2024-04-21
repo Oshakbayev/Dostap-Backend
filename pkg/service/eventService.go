@@ -9,7 +9,7 @@ import (
 
 type EventInterface interface {
 	CreateEvent(event *entity.Event, fileHeaders []*multipart.FileHeader) error
-	GetEventsByInterests([]int) ([]entity.Event, error)
+	GetEventsByInterests([]int, string) ([]entity.Event, error)
 	GetAllEvents() ([]entity.Event, error)
 	GetEventsByPage(limit, offset int) ([]entity.Event, error)
 }
@@ -22,7 +22,7 @@ func (s *Service) CreateEvent(event *entity.Event, fileHeaders []*multipart.File
 		s.log.Printf("\nError CreateEvent(service): %s\n", err.Error())
 		return err
 	}
-	err = s.repo.CreateEventOrganizers(event.ID, event.OrganizerIDs)
+	err = s.repo.CreateEventOrganizers(event.ID, event.OrganizerUsernames)
 	if err != nil {
 		s.log.Printf("\nError CreateEvent(service) during CreateEventOrganizers : %s\n", err.Error())
 		return err
@@ -52,8 +52,8 @@ func (s *Service) CreateEvent(event *entity.Event, fileHeaders []*multipart.File
 	return nil
 }
 
-func (s *Service) GetEventsByInterests(interests []int) ([]entity.Event, error) {
-	events, err := s.repo.GetEventsByInterests(interests)
+func (s *Service) GetEventsByInterests(interests []int, city string) ([]entity.Event, error) {
+	events, err := s.repo.GetEventsByInterests(interests, city)
 	if err != nil {
 		s.log.Printf("\nError GetEventsByInterests(service): %s\n", err.Error())
 		return nil, err

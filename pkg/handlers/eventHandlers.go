@@ -13,6 +13,7 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20) // Parse up to 10 MB of data
 	if err != nil {
 		h.l.Printf("error during ParseMultipartForm in CreateEvent(handler): %v", err)
+		h.WriteHTTPResponse(w, http.StatusBadRequest, "Invalid multipart form")
 		//http.Error(w, "Error parsing multipart form", http.StatusBadRequest)
 		return
 	}
@@ -55,7 +56,7 @@ func (h *Handler) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	//log.Println(event)
 	decodedClaims := r.Context().Value("decodedClaims").(*entity.Claims)
 	event.CreatorID = decodedClaims.Sub
-	event.OrganizerIDs = append(event.OrganizerIDs, decodedClaims.Username)
+	event.OrganizerUsernames = append(event.OrganizerUsernames, decodedClaims.Username)
 	//log.Println(decodedClaims.Sub, decodedClaims.Username)
 	if err := h.svc.CreateEvent(event, fileHeaders); err != nil {
 		h.l.Printf("error createEvent() CreateEvent(handler): %v", err)
@@ -91,7 +92,8 @@ func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
-	events, err := h.svc.GetEventsByInterests(interests)
+	city := r.URL.Query().Get("city")
+	events, err := h.svc.GetEventsByInterests(interests, city)
 	if err != nil {
 
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())

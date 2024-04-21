@@ -10,7 +10,7 @@ import (
 
 type EventInterface interface {
 	CreateEvent(event *entity.Event) error
-	GetEventsByInterests([]int) ([]entity.Event, error)
+	GetEventsByInterests([]int, string) ([]entity.Event, error)
 	CreateEventInterests(int, []int) error
 	CreateEventOrganizers(int, []string) error
 	GetAllEvents() ([]entity.Event, error)
@@ -18,7 +18,7 @@ type EventInterface interface {
 }
 
 func (r *Repository) CreateEvent(event *entity.Event) error {
-	stmt, err := r.db.Prepare(`INSERT INTO events (event_name, format_id, address, coordinatex, coordinatey, capacity, link, description,privacy_id,creator_id,start_time,end_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12) RETURNING id`)
+	stmt, err := r.db.Prepare(`INSERT INTO events (event_name, format_id, address, coordinatex, coordinatey, capacity, link, description,privacy_id,creator_id,start_time,end_time,city) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9,$10,$11,$12,$13) RETURNING id`)
 	if err != nil {
 		r.log.Printf("\nError at the stage of preparing data to Insert CreateEvent(repo):%s\n", err.Error())
 		return err
@@ -29,7 +29,7 @@ func (r *Repository) CreateEvent(event *entity.Event) error {
 			r.log.Printf("\nError at the stage of closing stmt CreateEvent(repo): %s\n", err.Error())
 		}
 	}(stmt)
-	err = stmt.QueryRow(event.EventName, event.FormatID, event.Address, event.CoordinateX, event.CoordinateY, event.Capacity, event.Link, event.Description, event.PrivacyID, event.CreatorID, event.StartTime, event.EndTime).Scan(&event.ID)
+	err = stmt.QueryRow(event.EventName, event.FormatID, event.Address, event.CoordinateX, event.CoordinateY, event.Capacity, event.Link, event.Description, event.PrivacyID, event.CreatorID, event.StartTime, event.EndTime, event.City).Scan(&event.ID)
 	if err != nil {
 		r.log.Printf("\nError at the stage of data Inserting CreateEvent(repo): %s\n", err.Error())
 		return err
@@ -99,7 +99,7 @@ ORDER BY t1.id;
 		}
 		orgArr = strings.Trim(orgArr, "{}NULL")
 		if orgArr != "" {
-			event.OrganizerIDs = strings.Split(orgArr, ",")
+			event.OrganizerUsernames = strings.Split(orgArr, ",")
 		}
 
 		intrsArr = strings.Trim(intrsArr, "{}NULL")
@@ -114,7 +114,7 @@ ORDER BY t1.id;
 	return allEvents, nil
 }
 
-func (r *Repository) GetEventsByInterests(interestList []int) ([]entity.Event, error) {
+func (r *Repository) GetEventsByInterests(interestList []int, city string) ([]entity.Event, error) {
 	interestArray := pq.Array(interestList)
 	query := `SELECT t1.*, COALESCE(interests, '{NULL}') AS interests
 FROM (
@@ -130,10 +130,10 @@ FROM (
   GROUP BY event_id
 ) t2
 ON t1.id = t2.event_id
-WHERE t2.interests && $1
+WHERE t2.interests && $1 AND t1.city = $2
 ORDER BY t1.id`
 
-	rows, err := r.db.Query(query, interestArray)
+	rows, err := r.db.Query(query, interestArray, city)
 	if err != nil {
 		r.log.Printf("\nError at the stage of Query GetEventByInterests(repo): %s\n", err.Error())
 		return nil, err
@@ -143,14 +143,14 @@ ORDER BY t1.id`
 		var orgArr string
 		var intrsArr string
 		event := entity.Event{}
-		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime, &orgArr, &intrsArr)
+		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime, &event.City, &orgArr, &intrsArr)
 		if err != nil {
-			r.log.Printf("\n error during scanning GetAllEvents(repo): %s\n", err.Error())
+			r.log.Printf("\n error during scanning GetEventsByInterests(repo): %s\n", err.Error())
 			return nil, err
 		}
 		orgArr = strings.Trim(orgArr, "{}NULL")
 		if orgArr != "" {
-			event.OrganizerIDs = strings.Split(orgArr, ",")
+			event.OrganizerUsernames = strings.Split(orgArr, ",")
 		}
 
 		intrsArr = strings.Trim(intrsArr, "{}NULL")
@@ -198,7 +198,7 @@ LIMIT $1 OFFSET $2`
 		}
 		orgArr = strings.Trim(orgArr, "{}NULL")
 		if orgArr != "" {
-			event.OrganizerIDs = strings.Split(orgArr, ",")
+			event.OrganizerUsernames = strings.Split(orgArr, ",")
 		}
 
 		intrsArr = strings.Trim(intrsArr, "{}NULL")

@@ -7,19 +7,14 @@ import (
 )
 
 func (h *Handler) ProfileEdit(w http.ResponseWriter, r *http.Request) {
-	var updateJson entity.UpdateJson
-	if err := json.NewDecoder(r.Body).Decode(&updateJson); err != nil {
+	var updatedUser entity.User
+	if err := json.NewDecoder(r.Body).Decode(&updatedUser); err != nil {
 		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
 		return
 	}
-	user := updateJson.UserInfo
-	decodedClaims, status, err := h.svc.TokenChecker(updateJson.Token.Token)
-	if err != nil {
-		h.WriteHTTPResponse(w, status, "Token "+updateJson.Token.Token+" is invalid: "+err.Error())
-		return
-	}
-	user.ID = decodedClaims.Sub
-	status, err = h.svc.UpdateUserProfileInfo(&user)
+
+	updatedUser.ID = r.Context().Value("decodedClaims").(*entity.Claims).Sub
+	status, err := h.svc.UpdateUserProfileInfo(&updatedUser)
 	if err != nil {
 		h.WriteHTTPResponse(w, status, err.Error())
 		return

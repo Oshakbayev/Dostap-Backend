@@ -34,24 +34,26 @@ type User struct {
 	Email           string `json:"email"`
 	IsEmailVerified bool
 	Username        string `json:"username"`
+	Interests       []int  `json:"interests"`
 }
 
 type Event struct {
-	ID           int
-	CreatorID    int
-	OrganizerIDs []string  `json:"organizerIDs"`
-	EventName    string    `json:"eventName"`
-	FormatID     int       `json:"formatID"`
-	Address      string    `json:"address"`
-	CoordinateX  float64   `json:"coordinateX"`
-	CoordinateY  float64   `json:"coordinateY"`
-	Capacity     int       `json:"capacity"`
-	Link         string    `json:"link"`
-	Description  string    `json:"description"`
-	PrivacyID    int       `json:"privacyID"`
-	InterestIDs  []int     `json:"interestIDs"`
-	StartTime    time.Time `json:"startTime"`
-	EndTime      time.Time `json:"endTime"`
+	ID                 int
+	CreatorID          int
+	OrganizerUsernames []string  `json:"organizerUsernames"`
+	EventName          string    `json:"eventName"`
+	FormatID           int       `json:"formatID"`
+	Address            string    `json:"address"`
+	CoordinateX        float64   `json:"coordinateX"`
+	CoordinateY        float64   `json:"coordinateY"`
+	Capacity           int       `json:"capacity"`
+	Link               string    `json:"link"`
+	Description        string    `json:"description"`
+	PrivacyID          int       `json:"privacyID"`
+	InterestIDs        []int     `json:"interestIDs"`
+	StartTime          time.Time `json:"startTime"`
+	EndTime            time.Time `json:"endTime"`
+	City               string    `json:"city"`
 }
 
 type Email struct {
@@ -70,8 +72,9 @@ type Credentials struct {
 }
 
 type Interest struct {
-	ID   int
-	Name string
+	ID       int
+	Name     string
+	Category string
 }
 type Claims struct {
 	Email    string `json:"email"`

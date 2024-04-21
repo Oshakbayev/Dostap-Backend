@@ -39,6 +39,9 @@ func (h *Handler) LogIn(w http.ResponseWriter, r *http.Request) {
 			h.WriteHTTPResponse(w, http.StatusBadRequest, "497")
 			//return http.StatusBadRequest, entity.NilID, fmt.Errorf("497 no user exist with this email or username %s", credentials.Email+credentials.Username)
 			return
+		} else if err.Error() == "492" || err.Error() == "495" || err.Error() == "496" {
+			h.WriteHTTPResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())
 		return

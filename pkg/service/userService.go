@@ -23,9 +23,9 @@ type UserServiceInterface interface {
 
 func (s *Service) GetAllUsernames() ([]string, error) {
 	usernames, err := s.repo.GetAllUsernames()
-	if err!= nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
 	return usernames, nil
 }
@@ -49,6 +49,10 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 		if err = s.repo.UpdateUserByID(user); err != nil {
 			return http.StatusInternalServerError, err
 		}
+		err = s.UpdateUserInterests(user.ID, user.Interests)
+		if err != nil {
+			return http.StatusInternalServerError, fmt.Errorf("error while inserting user interests")
+		}
 	} else if userInDB != nil && userInDB.IsEmailVerified {
 		return http.StatusBadRequest, fmt.Errorf("498")
 	} else if userInDB == nil {
@@ -57,6 +61,10 @@ func (s *Service) SignUp(user *entity.User) (int, error) {
 		if err != nil {
 			//s.log.Printf("Error while Inserting user into the table at the service level")
 			return http.StatusInternalServerError, fmt.Errorf("error while CreateUser new user: %v, error: %s", user, err)
+		}
+		err = s.CreateUserInterests(user.ID, user.Interests)
+		if err != nil {
+			return http.StatusInternalServerError, fmt.Errorf("error while inserting user interests")
 		}
 	}
 	emailContent, verificationLink, err := s.VerificationEmailGenerator(user.Email)
@@ -90,11 +98,11 @@ func (s *Service) LogIn(credentials *entity.Credentials) (*entity.User, error) {
 		return nil, err
 	}
 	if !user.IsEmailVerified {
-		return nil, fmt.Errorf(" 496 email %s is not verified", user.Email)
+		return nil, fmt.Errorf("496")
 	}
 	if err = bcrypt.CompareHashAndPassword([]byte(user.EncryptedPass), []byte(credentials.Password)); err != nil {
 		s.log.Printf("given password  is incorrect: %s", credentials.Password)
-		return nil, fmt.Errorf(" 495 given password is incorrect: %s", credentials.Password)
+		return nil, fmt.Errorf("495")
 	}
 	return user, nil
 }
