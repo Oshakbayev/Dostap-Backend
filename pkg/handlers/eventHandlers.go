@@ -85,15 +85,10 @@ func (h *Handler) UploadFile(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handler) GetEventsByInterests(w http.ResponseWriter, r *http.Request) {
-	var interests []int
-	if err := json.NewDecoder(r.Body).Decode(&interests); err != nil {
-		h.l.Printf("error during decoding json in GetEventsByInterests(handler): %v", err)
-		h.WriteHTTPResponse(w, http.StatusBadRequest, "499")
-		return
-	}
+func (h *Handler) GetSpecialForUserEvents(w http.ResponseWriter, r *http.Request) {
 	city := r.URL.Query().Get("city")
-	events, err := h.svc.GetEventsByInterests(interests, city)
+	userId := r.Context().Value("decodedClaims").(*entity.Claims).Sub
+	events, err := h.svc.GetSpecialForUserEvents(userId, city)
 	if err != nil {
 
 		h.WriteHTTPResponse(w, http.StatusInternalServerError, err.Error())

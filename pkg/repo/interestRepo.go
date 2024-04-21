@@ -3,6 +3,8 @@ package repo
 import (
 	"github.com/lib/pq"
 	"hellowWorldDeploy/pkg/entity"
+	"strconv"
+	"strings"
 )
 
 type InterestInterface interface {
@@ -10,6 +12,7 @@ type InterestInterface interface {
 	GetUserInterests(int) ([]entity.Interest, error)
 	CreateUserInterests(int, []int) error
 	DeleteUserInterests(int) error
+	GetUserInterestIdsArray(int) ([]int, error)
 }
 
 func (r *Repository) CreateUserInterests(userId int, interests []int) error {
@@ -58,6 +61,24 @@ func (r *Repository) GetUserInterests(userId int) ([]entity.Interest, error) {
 		userInterests = append(userInterests, interest)
 	}
 	return userInterests, err
+}
+
+func (r *Repository) GetUserInterestIdsArray(userId int) ([]int, error) {
+	query := `SELECT COALESCE(ARRAY_AGG(interest_id::int),'{NULL}') from user_interests WHERE user_id = $1 GROUP BY user_id`
+	var str string
+	var interests []int
+	err := r.db.QueryRow(query, userId).Scan(&str)
+	if err != nil {
+		r.log.Printf("\n error in GetUserInterestIdsArray(repo): %s\n", err.Error())
+		return nil, err
+	}
+	str = strings.Trim(str, "{}NULL")
+	for _, val := range strings.Split(str, ",") {
+		if id, err := strconv.Atoi(val); err == nil {
+			interests = append(interests, id)
+		}
+	}
+	return interests, err
 }
 
 func (r *Repository) DeleteUserInterests(userId int) error {

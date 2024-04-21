@@ -9,7 +9,7 @@ import (
 
 type EventInterface interface {
 	CreateEvent(event *entity.Event, fileHeaders []*multipart.FileHeader) error
-	GetEventsByInterests([]int, string) ([]entity.Event, error)
+	GetSpecialForUserEvents(int, string) ([]entity.Event, error)
 	GetAllEvents() ([]entity.Event, error)
 	GetEventsByPage(limit, offset int) ([]entity.Event, error)
 }
@@ -52,10 +52,15 @@ func (s *Service) CreateEvent(event *entity.Event, fileHeaders []*multipart.File
 	return nil
 }
 
-func (s *Service) GetEventsByInterests(interests []int, city string) ([]entity.Event, error) {
-	events, err := s.repo.GetEventsByInterests(interests, city)
+func (s *Service) GetSpecialForUserEvents(userId int, city string) ([]entity.Event, error) {
+	userInterests, err := s.repo.GetUserInterestIdsArray(userId)
 	if err != nil {
-		s.log.Printf("\nError GetEventsByInterests(service): %s\n", err.Error())
+		s.log.Printf("\nError GetSpecialForUserEvents(service): %s\n", err.Error())
+		return nil, err
+	}
+	events, err := s.repo.GetEventsByInterests(userInterests, city)
+	if err != nil {
+		s.log.Printf("\nError GetSpecialForUserEvents(service): %s\n", err.Error())
 		return nil, err
 	}
 	return events, nil
