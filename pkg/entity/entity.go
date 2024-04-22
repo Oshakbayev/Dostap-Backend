@@ -48,6 +48,7 @@ type Event struct {
 	CoordinateY        float64   `json:"coordinateY"`
 	Capacity           int       `json:"capacity"`
 	Link               string    `json:"link"`
+	Links              []string  `json:"links"`
 	Description        string    `json:"description"`
 	PrivacyID          int       `json:"privacyID"`
 	InterestIDs        []int     `json:"interestIDs"`

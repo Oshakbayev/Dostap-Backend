@@ -10,6 +10,23 @@ import (
 
 type EventBucketServiceInterface interface {
 	UploadFile(string, string, multipart.File) error
+	ListObjects(string, string) ([]string, error)
+}
+
+func (b *Bucket) ListObjects(bucketName string, prefix string) ([]string, error) {
+	result, err := b.bucketClient.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+		Prefix: &prefix,
+	})
+	var contents []string
+	if err != nil {
+		b.log.Printf("Couldn't list objects in bucket %v. Here's why: %v\n", bucketName, err)
+	} else {
+		for _, v := range result.Contents {
+			contents = append(contents, *v.Key)
+		}
+	}
+	return contents, err
 }
 
 func (b *Bucket) UploadFile(bucketName string, objectKey string, file multipart.File) error {

@@ -68,6 +68,13 @@ func (s *Service) GetSpecialForUserEvents(userId int, city string) ([]entity.Eve
 
 func (s *Service) GetAllEvents() ([]entity.Event, error) {
 	events, err := s.repo.GetAllEvents()
+	for i := range events {
+		if links, err := s.bc.ListObjects(entity.BucketName, events[i].Link); err != nil {
+			return nil, err
+		} else {
+			events[i].Links = links
+		}
+	}
 	if err != nil {
 		s.log.Printf("\nError GetAllEvents(service): %s\n", err.Error())
 		return nil, err
@@ -85,6 +92,13 @@ func (s *Service) UploadFile(file multipart.File, link string) error {
 
 func (s *Service) GetEventsByPage(limit, offset int) ([]entity.Event, error) {
 	events, err := s.repo.GetEventsByPage(limit, offset)
+	for i := range events {
+		if links, err := s.bc.ListObjects(entity.BucketName, events[i].Link); err != nil {
+			return nil, err
+		} else {
+			events[i].Links = links
+		}
+	}
 	if err != nil {
 		s.log.Printf("\nerror during GetEventsPage(Service): %s\n", err.Error())
 		return nil, err
