@@ -16,6 +16,7 @@ func CreateConfig() *Config {
 }
 
 func ReadConfig(configFilePath string, config *Config) error {
+	
 	configJSONData, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return err
@@ -23,5 +24,10 @@ func ReadConfig(configFilePath string, config *Config) error {
 	if err := json.Unmarshal(configJSONData, config); err != nil {
 		return err
 	}
+	
+	if port := os.Getenv("PORT"); port != "" {
+		config.HTTPPort = port
+	}
+
 	return nil
 }

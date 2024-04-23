@@ -10,6 +10,7 @@ import (
 	service2 "hellowWorldDeploy/pkg/service"
 	"log"
 	"net/http"
+
 )
 
 type Server struct {
@@ -19,6 +20,8 @@ type Server struct {
 }
 
 func InitServer(config *configPkg.Config, logger *log.Logger) *Server {
+
+  
 	client := bucket2.ConnectToBucket()
 	bc := bucket2.CreateBucket(logger, client)
 	db := database.CreateDB(config.DBDriver)
