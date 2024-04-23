@@ -108,7 +108,7 @@ func (s *Service) LogIn(credentials *entity.Credentials) (*entity.User, error) {
 }
 
 func (s *Service) TokenGenerator(userID int, email, username string) (string, error) {
-	expTime := time.Now().Add(time.Hour * 48)
+	expTime := time.Now().Add(time.Hour * 720)
 	claims := &entity.Claims{
 		Email:    email,
 		Level:    "user",
