@@ -26,7 +26,7 @@ func ReadConfig(configFilePath string, config *Config) error {
 	}
 	
 	if port := os.Getenv("PORT"); port != "" {
-		config.HTTPPort = port
+		config.HTTPPort = ":" + port
 	}
 
 	return nil
