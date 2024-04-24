@@ -191,7 +191,7 @@ LIMIT $1 OFFSET $2`
 		var orgArr string
 		var intrsArr string
 		event := entity.Event{}
-		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime, &orgArr, &intrsArr)
+		err = rows.Scan(&event.ID, &event.EventName, &event.FormatID, &event.Address, &event.CoordinateX, &event.CoordinateY, &event.Capacity, &event.Link, &event.Description, &event.PrivacyID, &event.CreatorID, &event.StartTime, &event.EndTime, &event.City, &orgArr, &intrsArr)
 		if err != nil {
 			r.log.Printf("\n error during scanning GetAllEvents(repo): %s\n", err.Error())
 			return nil, err
