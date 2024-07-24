@@ -1,8 +1,6 @@
-bin
-.env
-logs/logs.log
-dostapp
-dostapp.out
-server.crt
-server.key
-server.csr
+.idea
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
