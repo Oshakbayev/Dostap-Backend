@@ -1,0 +1,11 @@
+[versions]
+junit-jupiter-engine = "5.10.2"
+ktor = "2.3.7"
+
+[plugins]
+jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.22" }
+ktor = { id = "io.ktor.plugin", version.ref = "ktor" }
+
+[libraries]
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter-engine" }
+
