@@ -48,6 +48,7 @@ class UserEntity(id: EntityID<Long>) : LongEntity(id) {
     var username by UserTable.username
     var encryptedPassword by UserTable.encryptedPassword
     var residenceCity by CityEntity referencedOn UserTable.residenceCity
+    var residenceCityId by UserTable.residenceCity
     var avatarLink by UserTable.avatarLink
     var gender by UserTable.gender
     var age by UserTable.age
