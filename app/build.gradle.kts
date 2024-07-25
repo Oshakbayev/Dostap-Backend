@@ -30,6 +30,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposedVersion")
 
+    implementation("io.arrow-kt:arrow-core")
+    implementation("io.arrow-kt:arrow-fx-coroutines")
 
     implementation("io.insert-koin:koin-core:$koinVersion")
     implementation("io.insert-koin:koin-ktor:$koinVersion")
@@ -41,6 +43,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation(libs.junit.jupiter.engine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    implementation(platform("io.arrow-kt:arrow-stack:1.2.4"))
 }
 
 sourceSets.main {

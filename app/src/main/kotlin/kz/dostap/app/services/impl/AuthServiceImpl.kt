@@ -1,5 +1,7 @@
 package kz.dostap.app.services.impl
 
+import arrow.core.Either
+import arrow.core.raise.either
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import kotlinx.datetime.Clock
@@ -9,6 +11,8 @@ import kz.dostap.app.models.UserSignUpRequest
 import kz.dostap.app.plugins.EmailVerificationConfig
 import kz.dostap.app.plugins.JWTConfig
 import kz.dostap.app.services.AuthService
+import kz.dostap.app.services.LoginError
+import kz.dostap.app.services.SignUpError
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.springframework.security.crypto.bcrypt.BCrypt
@@ -21,24 +25,27 @@ class AuthServiceImpl(
 ) : AuthService {
     private val emailVerificationExpiresIn = emailVerificationConfig.expiresIn.minutes
 
-    override suspend fun login(username: String, password: String): Token? {
+    override suspend fun login(username: String, password: String): Either<LoginError.InvalidCredentials, Token> = either {
         val user = newSuspendedTransaction user@{
              UserEntity.find { UserTable.username eq username }
                 .firstOrNull()
-        } ?: return null
+        } ?: raise(LoginError.InvalidCredentials)
         if (user.encryptedPassword != password) {
-            return null
+            raise(LoginError.InvalidCredentials)
         }
-        return Token(generateToken(user), config.expiresIn)
+        Token(generateToken(user), config.expiresIn)
     }
 
-    override suspend fun signup(request: UserSignUpRequest): Token? {
+    override suspend fun signup(request: UserSignUpRequest) = either {
         val user = newSuspendedTransaction user@{
             UserEntity.find { (UserTable.username eq request.username) or (UserTable.email eq request.email) }
                 .firstOrNull()
-                ?.let { return@user null }
+                ?.let { raise(
+                    if (it.username == request.username) SignUpError.UsernameAlreadyTaken
+                    else SignUpError.EmailOrUsernameAlreadyTaken
+                ) }
 
-            val city = CityEntity.findById(request.cityId) ?: return@user null
+            val city = CityEntity.findById(request.cityId) ?: raise(SignUpError.CityNotFound)
             UserEntity.new {
                 firstName = request.firstName
                 lastName = request.lastName
@@ -52,9 +59,9 @@ class AuthServiceImpl(
                 phoneNumber = request.phoneNumber
                 description = request.description
             }.also { createEmailVerification(it) }
-        } ?: return null
+        }
 
-        return Token(generateToken(user), config.expiresIn)
+        Token(generateToken(user), config.expiresIn)
     }
 
     override suspend fun refreshToken(token: String): Token? {
