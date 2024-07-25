@@ -1,5 +1,7 @@
 package kz.dostap.app.entities
 
+import org.jetbrains.exposed.crypt.Algorithms
+import org.jetbrains.exposed.crypt.encryptedVarchar
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -12,7 +14,14 @@ object UserTable : LongIdTable("users") {
     val email = text("email").uniqueIndex()
     val isEmailVerified = bool("is_email_verified").default(false)
     val username = text("username").uniqueIndex()
-    val encryptedPassword = varchar("encrypted_password", 255)
+    val encryptedPassword = encryptedVarchar(
+        "encrypted_password",
+        255,
+        Algorithms.AES_256_PBE_CBC(
+            System.getenv("PASSWORD_ENCRYPTION_KEY"),
+            System.getenv("PASSWORD_ENCRYPTION_SALT")
+        )
+    )
     val residenceCity = reference("residence_city_id", CityTable)
     val avatarLink = text("avatar_link").nullable()
     val gender = enumerationByName<Gender>("gender", 10).nullable()

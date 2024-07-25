@@ -6,6 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
+import org.jetbrains.exposed.sql.kotlin.datetime.timestamp
 
 object EventTable : LongIdTable("events") {
     val creator = reference("creator", UserTable, onDelete = ReferenceOption.CASCADE)
@@ -15,8 +16,8 @@ object EventTable : LongIdTable("events") {
     val longitude = double("longitude").nullable()
     val capacity = integer("capacity").nullable()
     val description = text("description")
-    val startTime = datetime("start_time")
-    val endTime = datetime("end_time")
+    val startTime = timestamp("start_time")
+    val endTime = timestamp("end_time")
     val city = reference("city_id", CityTable)
 }
 
